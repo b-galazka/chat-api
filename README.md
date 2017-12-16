@@ -2,7 +2,7 @@
 How to use:
 1. Run "npm install" command.
 2. Set secrets, MongoDB URL, IP, port and JWT TTL in config.json file.
-3. Run "npm start" or "npm start-dev".
+3. Run "npm start" or "npm run start-dev".
 
 <hr>
 
