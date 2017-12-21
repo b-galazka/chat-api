@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
 
     try {
 
-        const {username, password} = req.body;
+        const { username, password } = req.body;
 
         const user = await User.findOne({
             username: new RegExp(`^${username}$`, 'i'),

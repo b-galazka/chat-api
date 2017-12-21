@@ -22,7 +22,7 @@ const createMessages = (numberOfRecordsToCreate) => {
 
     let promises = [];
 
-    for (let i=0; i<numberOfRecordsToCreate; i++) {
+    for (let i = 0; i < numberOfRecordsToCreate; i++) {
 
         const promise = Message.create({
             author: `user ${i}`,

@@ -1,7 +1,7 @@
 # Chat API
 How to use:
 1. Run "npm install" command.
-2. Set secrets, MongoDB URL, IP, port and JWT TTL in config.json file.
+2. Set secrets, MongoDB URL, IP, port, JWT TTL and allowed domains in config.json file.
 3. Run "npm start" or "npm start-dev".
 
 <hr>

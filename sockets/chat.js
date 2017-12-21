@@ -41,7 +41,7 @@ class ChatSocket {
                 const users = await User.find(
                     {}, 
                     { username: true, _id: true }, 
-                    { sort: {username: 1} }
+                    { sort: { username: 1 } }
                 );
 
                 const usersList = users.map(user => ({

@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
 
     if (error) {
 
-        return res.status(400).send({message: error.message});
+        return res.status(400).send({ message: error.message });
     }
 
     const { username } = req.body;

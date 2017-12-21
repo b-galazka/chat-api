@@ -8,5 +8,7 @@
     "mongoUrlTest": "mongodb://localhost/chat_test",
     "mongoUrlProd": "mongodb://localhost/chat",
 
-    "jwtTTL": "24h"
+    "jwtTTL": "24h",
+
+    "allowedDomains": ["http://example.com"]
 }

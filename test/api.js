@@ -7,7 +7,7 @@ const app = require('../index').app;
 const { jwtSecret } = require('../config');
 const User = require('../models/user');
 const Message = require('../models/message');
-const { createUsers, createMessages} = require('./functions');
+const { createUsers, createMessages } = require('./functions');
 const userSchema = require('../validationSchemas/user');
 const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
 const hash = require('../functions/hash');
@@ -36,7 +36,8 @@ describe('/users GET without an Authorization header', () => {
 
 describe('/users GET with an invalid Authorization header', () => {
 
-    it('should respond with a JSON with a message "invalid authorization header provided"', (done) => {
+    it('should respond with a JSON with a message ' +
+        '"invalid authorization header provided"', (done) => {
 
         request(app)
             .get('/users')
@@ -59,7 +60,8 @@ describe('/users GET with an invalid Authorization header', () => {
 
 describe('/users GET with an Authorization header other than Bearer', () => {
 
-    it('should respond with a JSON with a message "only bearer authorization is supported"', (done) => {
+    it('should respond with a JSON with a message ' +
+        '"only bearer authorization is supported"', (done) => {
 
         request(app)
             .get('/users')
@@ -258,7 +260,7 @@ describe('/users POST', () => {
 
     it('should respond with a JSON message if request body has only username', (done) => {
 
-        const reqBody = {username: 'user'};
+        const reqBody = { username: 'user' };
         const { error } = Joi.validate(reqBody, userSchema);
 
         request(app)
@@ -281,7 +283,7 @@ describe('/users POST', () => {
 
     it('should respond with a JSON message if request body has only password', (done) => {
 
-        const reqBody = {password: 'zaq1@WSX'};
+        const reqBody = { password: 'zaq1@WSX' };
         const { error } = Joi.validate(reqBody, userSchema);
 
         request(app)
@@ -356,7 +358,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if username is less than 4 characters length', (done) => {
+    it('should respond with a JSON message ' +
+        'if username is less than 4 characters length', (done) => {
 
         const reqBody = {
             username: 'xxx',
@@ -383,7 +386,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if username is more than 16 characters length', (done) => {
+    it('should respond with a JSON message ' +
+        'if username is more than 16 characters length', (done) => {
 
         const reqBody = {
             username: 'examplelongusernm',
@@ -410,7 +414,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if username has characters other than a-Z, 0-9 and _', (done) => {
+    it('should respond with a JSON message' +
+        'if username has characters other than a-Z, 0-9 and _', (done) => {
 
         const reqBody = {
             username: 'usern@me',
@@ -437,7 +442,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if password is less than 8 characters length', (done) => {
+    it('should respond with a JSON message' +
+        'if password is less than 8 characters length', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -464,7 +470,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if password is more than 32 characters length', (done) => {
+    it('should respond with a JSON message' +
+        'if password is more than 32 characters length', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -518,7 +525,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if password doesn\'t have any lower case letter', (done) => {
+    it('should respond with a JSON message ' +
+        'if password doesn\'t have any lower case letter', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -545,7 +553,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if password doesn\'t have any upper case letter', (done) => {
+    it('should respond with a JSON message ' +
+        'if password doesn\'t have any upper case letter', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -572,7 +581,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message if password doesn\'t have any special character', (done) => {
+    it('should respond with a JSON message ' +
+        'if password doesn\'t have any special character', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -599,7 +609,8 @@ describe('/users POST', () => {
             });
     });
 
-    it('should respond with a JSON message "provided username is being used" if username is currently being used', (done) => {
+    it('should respond with a JSON message "provided username is being used" ' +
+        'if username is currently being used', (done) => {
 
         const reqBody = {
             username: 'username',
@@ -740,7 +751,8 @@ describe('/users/username-availability POST', () => {
         });
     });
 
-    it('should respond with a JSON with a "free" field with false value if username is being used and an username', (done) => {
+    it('should respond with a JSON with a "free" field with false value ' + 
+        'if username is being used and an username', (done) => {
 
         request(app)
             .post('/users/username-availability')
@@ -761,7 +773,8 @@ describe('/users/username-availability POST', () => {
             });
     });
 
-    it('should respond with a JSON with a "free" field with true value if username is not being used and an username', (done) => {
+    it('should respond with a JSON with a "free" field with true value ' +
+        'if username is not being used and an username', (done) => {
 
         request(app)
             .post('/users/username-availability')
@@ -876,7 +889,8 @@ describe('/messages GET without an Authorization header', () => {
 
 describe('/messages GET with an invalid Authorization header', () => {
 
-    it('should respond with a JSON with a message "invalid authorization header provided"', (done) => {
+    it('should respond with a JSON with a message ' +
+        '"invalid authorization header provided"', (done) => {
 
         request(app)
             .get('/messages')
@@ -899,7 +913,8 @@ describe('/messages GET with an invalid Authorization header', () => {
 
 describe('/messages GET with an Authorization header other than Bearer', () => {
 
-    it('should respond with a JSON with a message "only bearer authorization is supported"', (done) => {
+    it('should respond with a JSON with a message ' +
+        '"only bearer authorization is supported"', (done) => {
 
         request(app)
             .get('/messages')
@@ -1348,7 +1363,8 @@ describe('/auth POST', () => {
             });
     });
 
-    it('should respond with a JSON message if wrong username or password has been sent', (done) => {
+    it('should respond with a JSON message ' +
+        'if wrong username or password has been sent', (done) => {
 
         request(app)
             .post('/auth')

@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
 
         const { before, skip, limit } = req.query;
 
-        const criteria = (before ? { _id: {$lt: before} } : {});
+        const criteria = (before ? { _id: { $lt: before } } : {});
 
         const excludedFields = {
             __v: false

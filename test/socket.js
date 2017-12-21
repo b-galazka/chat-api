@@ -89,12 +89,13 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an event "users" with a valid list of users to all connected clients when some client has been connected', (done) => {
+    it('should emit an event "users" with a valid list of users to all connected clients ' +
+        'when some client has been connected', (done) => {
 
         User.find(
             {},
             { username: true, _id: true },
-            { sort: {username: 1} }
+            { sort: { username: 1 } }
         )
         .then(([user1, user2]) => {
 
@@ -132,13 +133,14 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an event "expired token" with no data when client emits any event and its token is expired', (done) => {
+    it('should emit an event "expired token" with no data ' +
+        'when client emits any event and its token is expired', (done) => {
 
         clientSocket.disconnect();
 
         const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: 1 });
 
-        clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+        clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         setTimeout(() => {
 
@@ -153,7 +155,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should disconnect a socket when client emits any event and its token is expired', (done) => {
+    it('should disconnect a socket ' +
+        'when client emits any event and its token is expired', (done) => {
 
         clientSocket.disconnect();
 
@@ -174,10 +177,11 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an event "expired token" with no data to all clients with expired token when another client emits a "message" event', (done) => {
+    it('should emit an event "expired token" with no data to all clients with expired token ' +
+        'when another client emits a "message" event', (done) => {
 
         const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: 1 });
-        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         setTimeout(() => {
 
@@ -192,10 +196,11 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should disconnect all clients with expired token when another client emits a "message" event', (done) => {
+    it('should disconnect all clients with expired token ' +
+        'when another client emits a "message" event', (done) => {
 
         const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
-        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         setTimeout(() => {
 
@@ -210,7 +215,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an "users" event with a valid users list after disconnecting all clients with expired tokens by emitting a "message" event', (done) => {
+    it('should emit an "users" event with a valid users list after disconnecting all clients ' +
+        'with expired tokens by emitting a "message" event', (done) => {
 
         User.find(
             {},
@@ -220,7 +226,7 @@ describe('socket connecting with a valid token', () => {
         .then(([user1, user2]) => {
 
             const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
-            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
 
@@ -248,7 +254,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an "users" event with a valid users list after disconnecting socket with an expired token when it was emitting some event', (done) => {
+    it('should emit an "users" event with a valid users list after disconnecting socket ' +
+        'with an expired token when it was emitting some event', (done) => {
 
         User.find(
             {},
@@ -258,7 +265,7 @@ describe('socket connecting with a valid token', () => {
         .then(([user1, user2]) => {
 
             const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
-            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
 
@@ -286,7 +293,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit an "users" event with a valid users list when some client has disconnected', (done) => {
+    it('should emit an "users" event with a valid users list ' +
+        'when some client has disconnected', (done) => {
 
         User.find(
             {},
@@ -296,7 +304,7 @@ describe('socket connecting with a valid token', () => {
         .then(([user1, user2]) => {
 
             const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: '1h' });
-            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+            const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
 
@@ -322,7 +330,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit a "message validation error" event with an error if client emits "message" event with an invalid data', (done) => {
+    it('should emit a "message validation error" event with an error ' +
+        'if client emits "message" event with an invalid data', (done) => {
 
         const data = 'message content';
         const { error } = Joi.validate(data, messageSchema);
@@ -337,7 +346,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('shouldn\'t save a messsage in DB if client emits "message" event with an invalid data', (done) => {
+    it('shouldn\'t save a messsage in DB ' +
+        'if client emits "message" event with an invalid data', (done) => {
 
         const data = 'message content';
         const { error } = Joi.validate(data, messageSchema);
@@ -360,7 +370,8 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit a "message saved" event with a saved message object and temporary ID to the client which sent data', (done) => {
+    it('should emit a "message saved" event with a saved message object ' +
+        'and temporary ID to the client which sent data', (done) => {
 
         const data = {
             content: 'lorem ipsum',
@@ -405,10 +416,11 @@ describe('socket connecting with a valid token', () => {
         });
     });
 
-    it('should emit a "message" event with a saved message object to all clients excepting client which sent a message', (done) => {
+    it('should emit a "message" event with a saved message object to all clients ' +
+        'excepting client which sent a message', (done) => {
 
         const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: '1h' })
-        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: {token} });
+        const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         const data = {
             content: 'lorem ipsum',
