@@ -5,7 +5,7 @@ module.exports = Joi.object().keys({
     username: Joi.string()
         .min(4)
         .max(16)
-        .regex(/[^a-z0-9_]/i, { invert: true }),
+        .regex(/^[a-z0-9_]+$/i, 'letters, numbers and underscore only'),
 
     password: Joi.string()
         .min(8)
