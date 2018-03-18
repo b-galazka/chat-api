@@ -678,10 +678,7 @@ describe('/users POST', () => {
             .expect(201)
             .then((res) => {
 
-                return User.findOne({
-                    username,
-                    password: hashedPassowrd
-                }).then((user) => {
+                return User.findOne({ username, password }).then((user) => {
 
                     expect(user.username).to.be.eql(username);
                     expect(user.password).to.be.eql(hashedPassowrd);
@@ -1221,7 +1218,7 @@ describe('/auth POST', () => {
 
         User.create({
             username: 'userName',
-            password: hash('zaq1@WSX')
+            password: 'zaq1@WSX'
         })
         .then(() => {
 

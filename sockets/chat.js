@@ -38,11 +38,7 @@ class ChatSocket {
 
                 const connectedUsers = this._connectedUsers.slice();
 
-                const users = await User.find(
-                    {}, 
-                    { username: true, _id: true }, 
-                    { sort: { username: 1 } }
-                );
+                const users = await User.loadAlphabeticalList();
 
                 const usersList = users.map(user => ({
                     _id: user._id,

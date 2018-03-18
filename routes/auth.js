@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const authenticationDataValidation = require('../middlewares/authenticationDataValidation');
-const hash = require('../functions/hash');
 const { jwtSecret, jwtTTL } = require('../config');
 
 router.post('/', authenticationDataValidation);
@@ -14,10 +13,7 @@ router.post('/', async (req, res) => {
 
         const { username, password } = req.body;
 
-        const user = await User.findOne({
-            username: new RegExp(`^${username}$`, 'i'),
-            password: hash(password)
-        });
+        const user = await User.findOne({ username, password });
 
         if (user) {
 

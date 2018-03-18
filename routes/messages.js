@@ -9,27 +9,15 @@ router.get('/', async (req, res) => {
 
     try {
 
-        const { before, skip, limit } = req.query;
+        const { skip, limit, before } = req.query;
 
-        const criteria = (before ? { _id: { $lt: before } } : {});
-
-        const excludedFields = {
-            __v: false
-        };
-
-        const options = {
-
-            sort: {
-                _id: -1
-            },
-
+        const messages = await Message.loadByTimeAsc({
             skip: ~~skip,
-            limit: ~~limit
-        };
+            limit: ~~limit,
+            before
+        });
 
-        const messages = await Message.find(criteria, excludedFields, options);
-
-        res.send(messages.reverse());
+        res.send(messages);
     } catch (err) {
 
         console.error(err);

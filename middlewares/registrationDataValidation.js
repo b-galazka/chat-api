@@ -16,9 +16,7 @@ module.exports = async (req, res, next) => {
     
     try {
 
-        const user = await User.findOne({
-            username: new RegExp(`^${username.trim()}$`, 'i')
-        });
+        const user = await User.findOne({ username });
 
         if (user) {
 

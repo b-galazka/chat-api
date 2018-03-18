@@ -1,7 +1,6 @@
 const router = require('express').Router();
 
 const User = require('../models/user');
-const hash = require('../functions/hash');
 const registrationDataValidation = require('../middlewares/registrationDataValidation');
 const authorization = require('../middlewares/authorization');
 const usernameAvailabilityRequestValidation = require('../middlewares/usernameAvailabilityRequestValidation');
@@ -14,11 +13,7 @@ router.get('/', async (req, res) => {
 
     try {
 
-        const users = await User.find(
-            {},
-            { username: true, _id: true },
-            { sort: { username: 1 } }
-        );
+        const users = await User.loadAlphabeticalList();
 
         res.send(users);
     } catch (err) {
@@ -37,10 +32,7 @@ router.post('/', async (req, res) => {
 
         const { username, password } = req.body;
 
-        const createdUser = await User.create({
-            username,
-            password: hash(password)
-        });
+        const createdUser = await User.create({ username, password });
 
         res.status(201).send({
             username: createdUser.username,
@@ -62,10 +54,7 @@ router.post('/username-availability', async (req, res) => {
 
         const { username } = req.body;
 
-        const user = await User.findOne(
-            { username: new RegExp(`^${username.trim()}$`, 'i') }, 
-            { _id: true }
-        );
+        const user = await User.findOne({ username }, { _id: true });
 
         res.send({
             username,
