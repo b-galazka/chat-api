@@ -1,16 +1,20 @@
+const cors = require('cors');
+
 const { allowedDomains } = require('../config');
 
-module.exports = (req, res, next) => {
+const corsOptions = {
 
-    const domain = req.headers.origin;
+    origin(domain, callback) {
 
-    if (allowedDomains.includes(domain)) {
+        if (!domain || allowedDomains.includes(domain)) {
 
-        res.set('Access-Control-Allow-Origin', domain);
+            callback(null, true);
+
+        } else {
+
+            callback(new Error('Not allowed by CORS'));
+        }
     }
-
-    res.set('Access-Control-Allow-Methods', 'GET, POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    next();
 };
+
+module.exports = cors(corsOptions);

@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const catchJsonParsingError = require('./middlewares/catchJsonParsingError');
 const socketAuthorization = require('./middlewares/socketAuthorization');
 const setCorsHeaders = require('./middlewares/setCorsHeaders');
+const catchCorsError = require('./middlewares/catchCorsError');
 
 // routes
 const authRoutes = require('./routes/auth');
@@ -27,6 +28,7 @@ const app = express();
 app.disable('x-powered-by');
 
 app.use(setCorsHeaders);
+app.use(catchCorsError);
 app.use(bodyParser.json());
 app.use(catchJsonParsingError);
 
