@@ -1,16 +1,8 @@
 const Joi = require('joi');
 
 const User = require('../models/user');
-const userSchema = require('../validationSchemas/user');
 
 module.exports = async (req, res, next) => {
-
-    const { error } = Joi.validate(req.body, userSchema);
-
-    if (error) {
-
-        return res.status(400).send({ message: error.message });
-    }
 
     const { username } = req.body;
     
@@ -26,6 +18,7 @@ module.exports = async (req, res, next) => {
         }
 
         next();
+
     } catch (err) {
 
         console.error(err);

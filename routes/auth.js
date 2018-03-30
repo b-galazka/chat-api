@@ -2,10 +2,11 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const authenticationDataValidation = require('../middlewares/authenticationDataValidation');
+const authCredentialsSchema = require('../validationSchemas/authCredentials');
+const validateRequestBody = require('../middlewares/validateRequestBody');
 const { jwtSecret, jwtTtl } = require('../config');
 
-router.post('/', authenticationDataValidation);
+router.post('/', validateRequestBody(authCredentialsSchema));
 
 router.post('/', async (req, res) => {
 

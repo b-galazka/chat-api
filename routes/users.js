@@ -1,13 +1,16 @@
 const router = require('express').Router();
 
 const User = require('../models/user');
-const registrationDataValidation = require('../middlewares/registrationDataValidation');
+const checkUsernameAvailability = require('../middlewares/checkUsernameAvailability');
 const authorization = require('../middlewares/authorization');
-const usernameAvailabilityRequestValidation = require('../middlewares/usernameAvailabilityRequestValidation');
+const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
+const userSchema = require('../validationSchemas/user');
+const validateRequestBody = require('../middlewares/validateRequestBody');
 
-router.post('/', registrationDataValidation);
+router.post('/', validateRequestBody(userSchema));
+router.post('/', checkUsernameAvailability);
 router.get('/', authorization);
-router.post('/username-availability', usernameAvailabilityRequestValidation);
+router.post('/username-availability', validateRequestBody(usernameAvailabilityRequestSchema));
 
 router.get('/', async (req, res) => {
 
