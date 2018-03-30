@@ -2,8 +2,6 @@ const configureDotenv = require('./functions/configureDotenv');
 
 configureDotenv();
 
-console.log(typeof process.env.PORT);
-
 const {
     HASH_SECRET,
     JWT_SECRET,
