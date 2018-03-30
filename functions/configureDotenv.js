@@ -18,4 +18,4 @@ module.exports = () => {
     }
 
     dotenv.config({ path: '.env' });
-}
+};
