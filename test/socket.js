@@ -3,7 +3,8 @@ const clientIO = require('socket.io-client');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
-const { chatSocket, port, ip } = require('../index');
+const { chatSocket } = require('../index');
+const { port, ip } = require('../config');
 const User = require('../models/user');
 const Message = require('../models/message');
 const { addMessages, addUsers } = require('./functions');

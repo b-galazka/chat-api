@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const authenticationDataValidation = require('../middlewares/authenticationDataValidation');
-const { jwtSecret, jwtTTL } = require('../config');
+const { jwtSecret, jwtTtl } = require('../config');
 
 router.post('/', authenticationDataValidation);
 
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
 
             const { username, _id } = user;
 
-            jwt.sign({ username, _id }, jwtSecret, { expiresIn: jwtTTL }, (err, token) => {
+            jwt.sign({ username, _id }, jwtSecret, { expiresIn: jwtTtl }, (err, token) => {
                 
                 if (err) {
 

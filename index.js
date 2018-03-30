@@ -15,13 +15,10 @@ const usersRoutes = require('./routes/users');
 const messagesRoutes = require('./routes/messages');
 const notFoundRoutes = require('./routes/notFound');
 
-// configuration constants
-const { mongoUrlTest, mongoUrlProd, port, ip } = require('./config');
-
-const { NODE_ENV } = process.env;
-const mongoUrl = NODE_ENV === 'test' ? mongoUrlTest : mongoUrlProd;
-
 const ChatSocket = require('./sockets/chat');
+
+// configuration constants
+const { dbUrl, port, ip } = require('./config');
 
 // start express
 const app = express();
@@ -52,13 +49,13 @@ io.use(socketAuthorization);
 const chatSocket = new ChatSocket(io).init();
 
 // connect to DB
-mongoose.connect(mongoUrl);
+mongoose.connect(dbUrl);
 mongoose.Promise = Promise;
 
 // listen for requests
 server.listen(port, ip, () => {
 
-    if (NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== 'test') {
 
         console.log(`app is listening for requests at ${ip}:${port}`);
     }
@@ -67,7 +64,5 @@ server.listen(port, ip, () => {
 // export for tests
 module.exports = {
     app,
-    chatSocket,
-    port,
-    ip
+    chatSocket
 };
