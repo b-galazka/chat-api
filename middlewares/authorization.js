@@ -4,38 +4,32 @@ const { jwtSecret } = require('../config');
 
 const validateAuthHeader = (authHeader) => {
 
-    if (! authHeader) {
+    if (!authHeader) {
 
         return 'no authorization header provided';
     }
 
-    if (! authHeader.includes(' ')) {
+    const regex = /^Bearer ([a-z0-9_-]+)\.([a-z0-9_-]+)\.([a-z0-9_-]+)$/i;
+
+    if (!regex.test(authHeader)) {
 
         return 'invalid authorization header provided';
     }
-};
+}
 
 module.exports = async (req, res, next) => {
 
     const authHeader = req.header('Authorization');
+    const validationError = validateAuthHeader(authHeader);
 
-    const err = validateAuthHeader(authHeader);
-
-    if (err) {
+    if (validationError) {
 
         return res.status(403).send({
-            message: err
+            message: validationError
         });
     }
 
-    const [authMethod, token] = authHeader.split(' ');
-
-    if (authMethod.trim().toLowerCase() !== 'bearer') {
-
-        return res.status(403).send({
-            message: 'only bearer authorization is supported'
-        });
-    }
+    const token = authHeader.split(' ')[1];
 
     jwt.verify(token.trim(), jwtSecret, (err, data) => {
 
@@ -44,7 +38,7 @@ module.exports = async (req, res, next) => {
             console.error(err);
 
             return res.status(401).send({
-                message: 'invalid token'
+                message: 'expired or invalid token'
             });
         }
 

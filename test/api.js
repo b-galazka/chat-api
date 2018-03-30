@@ -61,7 +61,7 @@ describe('/users GET with an invalid Authorization header', () => {
 describe('/users GET with an Authorization header other than Bearer', () => {
 
     it('should respond with a JSON with a message ' +
-        '"only bearer authorization is supported"', (done) => {
+        '"invalid authorization header provided"', (done) => {
 
         request(app)
             .get('/users')
@@ -70,7 +70,7 @@ describe('/users GET with an Authorization header other than Bearer', () => {
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'only bearer authorization is supported'
+                    message: 'invalid authorization header provided'
                 });
 
                 done();
@@ -88,12 +88,12 @@ describe('/users GET with an invalid token', () => {
 
         request(app)
             .get('/users')
-            .set('Authorization', 'Bearer invalid_token')
+            .set('Authorization', 'Bearer xxx.xxx.xxx')
             .expect(401)
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'invalid token'
+                    message: 'expired or invalid token'
                 });
 
                 done();
@@ -735,7 +735,7 @@ describe('/users/username-availability POST', () => {
             })
             .catch((err) => {
 
-                console.log(err);
+                console.error(err);
             });
         });
     });
@@ -911,7 +911,7 @@ describe('/messages GET with an invalid Authorization header', () => {
 describe('/messages GET with an Authorization header other than Bearer', () => {
 
     it('should respond with a JSON with a message ' +
-        '"only bearer authorization is supported"', (done) => {
+        '"invalid authorization header provided"', (done) => {
 
         request(app)
             .get('/messages')
@@ -920,7 +920,7 @@ describe('/messages GET with an Authorization header other than Bearer', () => {
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'only bearer authorization is supported'
+                    message: 'invalid authorization header provided'
                 });
 
                 done();
@@ -938,12 +938,12 @@ describe('/messages GET with an invalid token', () => {
 
         request(app)
             .get('/messages')
-            .set('Authorization', 'Bearer invalid_token')
+            .set('Authorization', 'Bearer xxx.xxx.xxx')
             .expect(401)
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'invalid token'
+                    message: 'expired or invalid token'
                 });
 
                 done();
