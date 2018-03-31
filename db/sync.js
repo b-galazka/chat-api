@@ -3,6 +3,7 @@ const mysql = require('mysql2/promise');
 const { dbName, dbHost, dbPassword, dbUser } = require('../config');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const db = require('./');
 
 const createDatabaseIfNotExists = async () => {
 
@@ -36,6 +37,8 @@ const syncSequelizeModels = async () => {
 
         await createDatabaseIfNotExists();
         await syncSequelizeModels();
+
+        await db.close();
 
         console.log('DB synced');
 
