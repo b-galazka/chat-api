@@ -1,4 +1,34 @@
-const mongoose = require('mongoose');
+const { STRING, UUID, UUIDV4 } = require('sequelize');
+
+const db = require('../db');
+
+const userSchema = {
+
+    id: {
+        type: UUID,
+        primaryKey: true,
+        defaultValue: UUIDV4
+    },
+
+    username: {
+        type: STRING(30),
+        allowNull: false
+    },
+
+    password: {
+        type: STRING(255),
+        allowNull: false
+    }
+};
+
+const User = db.define('user', userSchema, { timestamps: false });
+
+module.exports = User;
+
+
+
+
+/* const mongoose = require('mongoose');
 
 const hash = require('../functions/hash');
 
@@ -54,4 +84,4 @@ UserSchema.pre('save', function (next) {
 
 const User = mongoose.model('user', UserSchema);
 
-module.exports = User;
+module.exports = User; */

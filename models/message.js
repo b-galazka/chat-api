@@ -1,4 +1,47 @@
-const mongoose = require('mongoose');
+const { TEXT, UUID, DATE, NOW, UUIDV4 } = require('sequelize');
+
+const db = require('../db');
+const User = require('./User');
+
+const messageSchema = {
+
+    id: {
+        type: UUID,
+        defaultValue: UUIDV4,
+        primaryKey: true
+    },
+
+    date: {
+        type: DATE,
+        defaultValue: NOW
+    },
+
+    content: {
+        type: TEXT,
+        allowNull: false
+    },
+
+    authorId: {
+        type: UUID,
+        allowNull: false,
+
+        references: {
+            model: User,
+            key: 'id'
+        }
+    }
+};
+
+const Message = db.define('message', messageSchema, { timestamps: false });
+
+Message.belongsTo(User, {
+    as: 'author',
+    foreignKey: 'authorId'
+});
+
+module.exports = Message;
+
+/* const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema({
 
@@ -54,4 +97,4 @@ MessageSchema.statics = {
 
 const Message = mongoose.model('messages', MessageSchema);
 
-module.exports = Message;
+module.exports = Message; */

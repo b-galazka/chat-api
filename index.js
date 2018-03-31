@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const http = require('http');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
@@ -19,7 +18,7 @@ const notFoundRoutes = require('./routes/notFound');
 const ChatSocket = require('./sockets/chat');
 
 // configuration constants
-const { dbUrl, port, ip } = require('./config');
+const { port, ip } = require('./config');
 
 // start express
 const app = express();
@@ -49,10 +48,6 @@ io.use(socketAuthorization);
 
 // start socket
 const chatSocket = new ChatSocket(io).init();
-
-// connect to DB
-mongoose.connect(dbUrl);
-mongoose.Promise = Promise;
 
 // listen for requests
 server.listen(port, ip, () => {

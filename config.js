@@ -8,8 +8,12 @@ const {
     PORT,
     IP,
     JWT_TTL,
-    DB_URL,
-    ALLOWED_DOMAINS
+    ALLOWED_DOMAINS,
+    DB_NAME,
+    DB_USER,
+    DB_PASS,
+    DB_HOST,
+    DOMAIN
 } = process.env;
 
 module.exports = {
@@ -20,7 +24,10 @@ module.exports = {
     port: +PORT || 3000,
     ip: IP || '127.0.0.1',
 
-    dbUrl: DB_URL || '',
+    dbName: DB_NAME || 'chat',
+    dbUser: DB_USER || 'root',
+    dbPassword: DB_PASS || '',
+    dbHost: DB_HOST || '127.0.0.1',
 
     jwtTtl: JWT_TTL || '24h',
 
