@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const Message = require('../models/message');
+const Message = require('../models/Message');
 const authorization = require('../middlewares/authorization');
 
 router.get('/', authorization);

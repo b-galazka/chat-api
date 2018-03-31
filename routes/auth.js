@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');
+const User = require('../models/User');
 const authCredentialsSchema = require('../validationSchemas/authCredentials');
 const validateRequestBody = require('../middlewares/validateRequestBody');
 const { jwtSecret, jwtTtl } = require('../config');

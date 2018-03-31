@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const User = require('../models/user');
+const User = require('../models/User');
 const checkUsernameAvailability = require('../middlewares/checkUsernameAvailability');
 const authorization = require('../middlewares/authorization');
 const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
