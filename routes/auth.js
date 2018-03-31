@@ -27,9 +27,7 @@ router.post('/', async (req, res) => {
                     throw err;
                 }
 
-                res.send({
-                    token
-                });
+                res.send({ token });
             });
         } else {
 

@@ -31,7 +31,7 @@ module.exports = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token.trim(), jwtSecret, (err, data) => {
+    jwt.verify(token, jwtSecret, (err, data) => {
 
         if (err) {
 
