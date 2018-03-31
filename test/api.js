@@ -10,7 +10,6 @@ const Message = require('../models/message');
 const { createUsers, createMessages } = require('./functions');
 const userSchema = require('../validationSchemas/user');
 const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
-const hash = require('../functions/hash');
 
 describe('/users GET without an Authorization header', () => {
 
@@ -667,7 +666,7 @@ describe('/users POST', () => {
 
         const username = 'user';
         const password = 'zaq1@WSX';
-        const hashedPassowrd = hash(password);
+        const hashedPassowrd = User.generateHash(password);
 
         request(app)
             .post('/users')
