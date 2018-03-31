@@ -1,5 +1,7 @@
 const { STRING, UUID, UUIDV4 } = require('sequelize');
+const crypto = require('crypto');
 
+const { hashSecret } = require('../config');
 const db = require('../db');
 
 const userSchema = {
@@ -22,6 +24,13 @@ const userSchema = {
 };
 
 const User = db.define('user', userSchema, { timestamps: false });
+
+User.generateHash = password => (
+    crypto
+        .createHmac('sha512', hashSecret)
+        .update(password)
+        .digest('hex')
+);
 
 module.exports = User;
 
