@@ -32,6 +32,8 @@ User.generateHash = password => (
         .digest('hex')
 );
 
+User.isTokenExpired = tokenData => tokenData.exp * 1000 < Date.now();
+
 module.exports = User;
 
 

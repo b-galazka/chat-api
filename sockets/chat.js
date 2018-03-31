@@ -3,7 +3,6 @@ const Joi = require('joi');
 const User = require('../models/user');
 const Message = require('../models/message');
 const messageSchema = require('../validationSchemas/message');
-const isTokenExpired = require('../functions/isTokenExpired');
 
 class ChatSocket {
 
@@ -85,7 +84,7 @@ class ChatSocket {
 
             const { tokenData } = socket.handshake;
 
-            if (isTokenExpired(tokenData)) {
+            if (User.isTokenExpired(tokenData)) {
 
                 this._disconnectSocket(socket);
             }
@@ -100,7 +99,7 @@ class ChatSocket {
 
             const { tokenData } = socket.handshake;
 
-            if (isTokenExpired(tokenData)) {
+            if (User.isTokenExpired(tokenData)) {
 
                 this._disconnectSocket(socket);
 
