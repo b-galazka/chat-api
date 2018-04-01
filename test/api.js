@@ -1,10 +1,8 @@
 const request = require('supertest');
 const expect = require('chai').expect;
-const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
 const app = require('../index').app;
-const { jwtSecret } = require('../config');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const { createUsers, createMessages } = require('./functions');
@@ -1399,9 +1397,8 @@ describe('/auth POST', () => {
                 expect(res.body).to.be.an('object');
                 expect(token).to.be.a('string');
 
-                jwt.verify(token, jwtSecret);
-
-                done();
+                User.verifyToken(token)
+                    .then(() => done());
             })
             .catch((err) => {
 
@@ -1425,11 +1422,13 @@ describe('/auth POST', () => {
                 expect(res.body).to.be.an('object');
                 expect(token).to.be.a('string');
 
-                const { iat, exp } = jwt.verify(token, jwtSecret);
+                User.verifyToken()
+                    .then(({iat, exp}) => {
 
-                expect(exp - iat).to.be.eql(60 * 60 * 24);
+                        expect(exp - iat).to.be.eql(60 * 60 * 24);
 
-                done();
+                        done();
+                    });        
             })
             .catch((err) => {
 

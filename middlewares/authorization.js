@@ -1,6 +1,4 @@
-const jwt = require('jsonwebtoken');
-
-const { jwtSecret } = require('../config');
+const User = require('../models/User');
 
 const validateAuthHeader = (authHeader) => {
 
@@ -31,17 +29,18 @@ module.exports = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, jwtSecret, (err, data) => {
+    try {
 
-        if (err) {
-
-            console.error(err);
-
-            return res.status(401).send({
-                message: 'expired or invalid token'
-            });
-        }
+        await User.verifyToken(token);
 
         next();
-    });
+
+    } catch (err) {
+
+        console.error(err);
+
+        return res.status(401).send({
+            message: 'expired or invalid token'
+        });
+    }
 };

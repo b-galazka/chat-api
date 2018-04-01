@@ -1,7 +1,8 @@
 const { STRING, INTEGER } = require('sequelize');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
-const { hashSecret } = require('../config');
+const { hashSecret, jwtSecret } = require('../config');
 const db = require('../db');
 const trimStrings = require('../functions/trimSequelizeModelStrings');
 
@@ -34,6 +35,19 @@ User.generateHash = password => (
 );
 
 User.isTokenExpired = tokenData => tokenData.exp * 1000 < Date.now();
+
+User.verifyToken = token => new Promise((resolve, reject) => {
+
+    jwt.verify(token, jwtSecret, (err, data) => {
+
+        if (err) {
+
+            reject(err)
+        }
+
+        resolve(data);
+    });
+});
 
 User.hook('beforeValidate', trimStrings);
 
