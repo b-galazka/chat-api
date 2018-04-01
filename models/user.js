@@ -37,6 +37,26 @@ User.isTokenExpired = tokenData => tokenData.exp * 1000 < Date.now();
 
 User.hook('beforeValidate', trimStrings);
 
+User.hook('beforeCreate', (instance) => {
+
+    const { dataValues } = instance;
+
+    if (typeof dataValues.password === 'string') {
+
+        dataValues.password = User.generateHash(dataValues.password);
+    }
+});
+
+User.hook('beforeFind', (options) => {
+
+    const { where } = options;
+
+    if (typeof where.password === 'string') {
+
+        where.password = User.generateHash(where.password);
+    }
+});
+
 module.exports = User;
 
 
