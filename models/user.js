@@ -1,4 +1,4 @@
-const { STRING, UUID, UUIDV4 } = require('sequelize');
+const { STRING, INTEGER } = require('sequelize');
 const crypto = require('crypto');
 
 const { hashSecret } = require('../config');
@@ -8,9 +8,9 @@ const trimStrings = require('../functions/trimSequelizeModelStrings');
 const userSchema = {
 
     id: {
-        type: UUID,
+        type: INTEGER,
         primaryKey: true,
-        defaultValue: UUIDV4
+        autoIncrement: true
     },
 
     username: {

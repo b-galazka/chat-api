@@ -1,4 +1,4 @@
-const { TEXT, UUID, DATE, NOW, UUIDV4 } = require('sequelize');
+const { TEXT, DATE, NOW, INTEGER } = require('sequelize');
 
 const db = require('../db');
 const User = require('./User');
@@ -7,9 +7,9 @@ const trimStrings = require('../functions/trimSequelizeModelStrings');
 const messageSchema = {
 
     id: {
-        type: UUID,
-        defaultValue: UUIDV4,
-        primaryKey: true
+        type: INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
 
     date: {
@@ -23,7 +23,7 @@ const messageSchema = {
     },
 
     authorId: {
-        type: UUID,
+        type: INTEGER,
         allowNull: false,
 
         references: {
