@@ -1,20 +1,19 @@
-const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const { jwtSecret } = require('../config');
-
-module.exports = (socket, next) => {
+module.exports = async (socket, next) => {
 
     const { token } = socket.handshake.query;
 
-    jwt.verify(token, jwtSecret, (err, data) => {
+    try {
 
-        if (err) {
-            
-            return next(new Error('invalid token or no token provided'));
-        }
-
-        socket.handshake.tokenData = data;
+        await User.verifyToken(token);
 
         next();
-    });
+
+    } catch (err) {
+
+        console.error(err);
+
+        next(new Error('invalid token or no token provided'));
+    }
 };
