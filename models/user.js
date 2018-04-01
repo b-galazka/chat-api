@@ -3,6 +3,7 @@ const crypto = require('crypto');
 
 const { hashSecret } = require('../config');
 const db = require('../db');
+const trimStrings = require('../functions/trimSequelizeModelStrings');
 
 const userSchema = {
 
@@ -33,6 +34,8 @@ User.generateHash = password => (
 );
 
 User.isTokenExpired = tokenData => tokenData.exp * 1000 < Date.now();
+
+User.hook('beforeValidate', trimStrings);
 
 module.exports = User;
 

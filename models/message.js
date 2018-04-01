@@ -2,6 +2,7 @@ const { TEXT, UUID, DATE, NOW, UUIDV4 } = require('sequelize');
 
 const db = require('../db');
 const User = require('./User');
+const trimStrings = require('../functions/trimSequelizeModelStrings');
 
 const messageSchema = {
 
@@ -38,6 +39,8 @@ Message.belongsTo(User, {
     as: 'author',
     foreignKey: 'authorId'
 });
+
+Message.hook('beforeValidate', trimStrings);
 
 module.exports = Message;
 
