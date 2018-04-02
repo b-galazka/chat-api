@@ -15,7 +15,7 @@ const usersRoutes = require('./routes/users');
 const messagesRoutes = require('./routes/messages');
 const notFoundRoutes = require('./routes/notFound');
 
-const ChatSocket = require('./sockets/chat');
+const ChatSocket = require('./sockets/Chat');
 
 // configuration constants
 const { port, ip } = require('./config');
