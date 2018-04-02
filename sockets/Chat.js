@@ -40,7 +40,7 @@ class ChatSocket {
                 const users = await User.loadAlphabeticalList();
 
                 const usersList = users.map(user => ({
-                    _id: user._id,
+                    id: user.id,
                     username: user.username,
                     connected: connectedUsers.includes(user.username)
                 }));
@@ -123,7 +123,7 @@ class ChatSocket {
 
     _setOnMessageHandler(socket) {
 
-        const { username } = socket.handshake.tokenData;
+        const { username, id: authorId } = socket.handshake.tokenData;
 
         socket.on('message', async (message) => {
 
@@ -139,7 +139,7 @@ class ChatSocket {
                     return socket.emit('message validation error', error.message);
                 }
 
-                const savedMessage = await Message.create({ author: username, content });
+                const savedMessage = await Message.create({ authorId, content });
 
                 socket.broadcast.emit('message', savedMessage);
 
