@@ -80,11 +80,9 @@ User.hook('beforeValidate', trimStrings);
 
 User.hook('beforeCreate', (instance) => {
 
-    const { dataValues } = instance;
+    if (typeof instance.password === 'string') {
 
-    if (typeof dataValues.password === 'string') {
-
-        dataValues.password = User.generateHash(dataValues.password);
+        instance.password = User.generateHash(instance.password);
     }
 });
 
