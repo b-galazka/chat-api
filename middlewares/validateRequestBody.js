@@ -1,16 +1,13 @@
 const Joi = require('joi');
 
-module.exports = (requestSchema) => {
+module.exports = requestBodySchema => (req, res, next) => {
 
-    return (req, res, next) => {
+    const { error } = Joi.validate(req.body, requestBodySchema);
 
-        const { error } = Joi.validate(req.body, requestSchema);
+    if (error) {
 
-        if (error) {
+        return res.status(400).send({ message: error.message });
+    }
 
-            return res.status(400).send({ message: error.message });
-        }
-
-        next();
-    };
+    next();
 };
