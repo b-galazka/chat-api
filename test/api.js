@@ -1,6 +1,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
 const Joi = require('joi');
+const jwt = require('jsonwebtoken');
 
 const app = require('../index').app;
 const User = require('../models/User');
@@ -8,6 +9,7 @@ const Message = require('../models/Message');
 const { createUsers, createMessages } = require('./functions');
 const userSchema = require('../validationSchemas/user');
 const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
+const { jwtSecret } = require('../config');
 
 describe('/users GET without an Authorization header', () => {
 
@@ -1397,8 +1399,9 @@ describe('/auth POST', () => {
                 expect(res.body).to.be.an('object');
                 expect(token).to.be.a('string');
 
-                User.verifyToken(token)
-                    .then(() => done());
+                jwt.verify(token, jwtSecret);
+
+                done();
             })
             .catch((err) => {
 
@@ -1422,13 +1425,11 @@ describe('/auth POST', () => {
                 expect(res.body).to.be.an('object');
                 expect(token).to.be.a('string');
 
-                User.verifyToken()
-                    .then(({iat, exp}) => {
+                const { iat, exp } = jwt.verify(token, jwtSecret);
 
-                        expect(exp - iat).to.be.eql(60 * 60 * 24);
+                expect(exp - iat).to.be.eql(60 * 60 * 24);
 
-                        done();
-                    });        
+                done();     
             })
             .catch((err) => {
 
