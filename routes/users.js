@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
 
         res.status(201).send({
             username: createdUser.username,
-            _id: createdUser._id
+            id: createdUser.id
         });
     } catch (err) {
 
@@ -57,7 +57,9 @@ router.post('/username-availability', async (req, res) => {
 
         const { username } = req.body;
 
-        const user = await User.findOne({ username }, { _id: true });
+        const user = await User.findOne({
+            where: { username }
+        });
 
         res.send({
             username,
