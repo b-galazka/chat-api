@@ -2,7 +2,7 @@ const { STRING, INTEGER } = require('sequelize');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const { hashSecret, jwtSecret } = require('../config');
+const { hashSecret, jwtSecret, jwtTtl } = require('../config');
 const db = require('../db');
 const trimStrings = require('../functions/trimSequelizeModelStrings');
 
@@ -42,10 +42,37 @@ User.verifyToken = token => new Promise((resolve, reject) => {
 
         if (err) {
 
-            reject(err)
+            return reject(err)
         }
 
         resolve(data);
+    });
+});
+
+User.generateToken = async (credentials) => {
+
+    const user = await User.findOne({ where: credentials });
+
+    if (!user) {
+
+        throw new Error('invalid credentials');
+    }
+
+    const { username, id } = user;
+
+    return User._getToken({ username, id });
+};
+
+User._getToken = data => new Promise((resolve, reject) => {
+
+    jwt.sign(data, jwtSecret, { expiresIn: jwtTtl }, (err, token) => {
+
+        if (err) {
+
+            return reject(err);
+        }
+
+        resolve(token);
     });
 });
 
