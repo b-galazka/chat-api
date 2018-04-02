@@ -92,7 +92,7 @@ User.hook('beforeFind', (options) => {
 
     const { where } = options;
 
-    if (typeof where.password === 'string') {
+    if (where && typeof where.password === 'string') {
 
         where.password = User.generateHash(where.password);
     }
