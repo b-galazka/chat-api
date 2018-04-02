@@ -23,7 +23,7 @@ class ChatSocket {
 
             this._setTokenExpirationMiddleware(socket);
             this._setOnDisconnectHandler(socket);
-            this._setOnMessageHandler(socket);        
+            this._setOnMessageHandler(socket);
         });
 
         return this;
@@ -51,7 +51,7 @@ class ChatSocket {
                 console.error(err);
 
                 this._io.emit('users error');
-            }    
+            }
         })();
     }
 
