@@ -35,16 +35,18 @@ const syncSequelizeModels = async () => {
 
     try {
 
+        const { NODE_ENV } = process.env;
+
         await createDatabaseIfNotExists();
         await syncSequelizeModels();
 
         await db.close();
 
-        console.log('DB synced');
+        console.log(`${NODE_ENV} DB synced`);
 
     } catch(err) {
 
-        console.error('something went wrong during syncing DB');
+        console.error(`something went wrong during syncing ${NODE_ENV} DB`);
         console.error(err);
     }
 })();
