@@ -58,7 +58,10 @@ router.post('/username-availability', async (req, res) => {
         const { username } = req.body;
 
         const user = await User.findOne({
-            where: { username }
+
+            where: { 
+                username: username.trim()
+            }
         });
 
         res.send({
