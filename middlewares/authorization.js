@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 const validateAuthHeader = (authHeader) => {
 
-    if (!authHeader) {
+    if (authHeader === undefined) {
 
         return 'no authorization header provided';
     }
