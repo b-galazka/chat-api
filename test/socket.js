@@ -7,11 +7,26 @@ const { chatSocket } = require('../index');
 const { port, ip } = require('../config');
 const User = require('../models/User');
 const Message = require('../models/Message');
-const { addMessages, addUsers } = require('./functions');
+const { truncateTable } = require('./functions');
 const { jwtSecret } = require('../config');
 const messageSchema = require('../validationSchemas/message');
 
-describe('socket connecting with an invalid token or without token', () => {
+describe('socket connecting without token', () => {
+
+    it('should emit an "error" event with error object', (done) => {
+
+        const clientSocket = clientIO.connect(`http://${ip}:${port}`);
+
+        clientSocket.on('error', (err) => {
+
+            expect(err).to.be.equal('no token provided');
+
+            done();
+        });
+    });
+});
+
+describe('socket connecting with an invalid or expired token', () => {
 
     it('should emit an "error" event with error object if provided token is invalid', (done) => {
 
@@ -20,87 +35,82 @@ describe('socket connecting with an invalid token or without token', () => {
 
         clientSocket.on('error', (err) => {
 
-            expect(err).to.be.eql('invalid token or no token provided');
+            expect(err).to.be.equal('invalid token provided');
 
             done();
         });
     });
 
-    it('should emit an "error" event with error object if token is not provided', (done) => {
+    it('should emit an "error" event with error object if provided token is expired', (done) => {
 
-        const token = 'invalid_token';
-        const clientSocket = clientIO.connect(`http://${ip}:${port}`);
+        const token = jwt.sign({}, jwtSecret, { expiresIn: 1 });
 
-        clientSocket.on('error', (err) => {
+        setTimeout(() => {
+            
+            const clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: { token }});
 
-            expect(err).to.be.eql('invalid token or no token provided');
+            clientSocket.on('error', (err) => {
 
-            done();
-        });
+                expect(err).to.be.equal('expired token provided');
+
+                done();
+            });
+
+        }, 1010);
+        
     });
 });
 
 describe('socket connecting with a valid token', () => {
 
     let clientSocket;
+    let user1Data;
+    let user2Data;
 
-    before((done) => {
+    before(async () => {
 
-        const user1 = User.create({
-            username: 'user1',
-            password: 'xxx'
-        });
+        const [user1, user2] = await Promise.all([
+            User.create({ username: 'user1', password: 'xxx' }),
+            User.create({ username: 'user2', password: 'xxx' })
+        ]);
 
-        const user2 = User.create({
-            username: 'user2',
-            password: 'xxx'
-        });
-
-        Promise.all([user1, user2]).then(() => {
-
-            done();
-        }).catch((err) => {
-
-            console.error(err);
-        });
+        user1Data = { username: user1.username, id: user1.id };
+        user2Data = { username: user2.username, id: user2.id };
     });
 
     beforeEach(() => {
 
-        const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: '1h' });
+        const token = jwt.sign(user1Data, jwtSecret, { expiresIn: '1h' });
 
         clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
     });
 
-    afterEach((done) => {
-
-        Message.collection.drop(() => {
-
-            done();
-        });
+    afterEach(async () => {
 
         clientSocket.disconnect();
+
+        await truncateTable(Message); 
     });
 
-    after((done) => {
+    after(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
     it('should emit an event "users" with a valid list of users to all connected clients ' +
         'when some client has been connected', (done) => {
 
-        User.find(
-            {},
-            { username: true, _id: true },
-            { sort: { username: 1 } }
-        )
+        User.findAll({
+
+            attributes: ['username', 'id'],
+
+            order: [
+                ['username', 'ASC']
+            ]
+        })
         .then(([user1, user2]) => {
 
-            const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: '1h' })
+            const token = jwt.sign(user2Data, jwtSecret, { expiresIn: '1h' })
             const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let secondClientConnected = false;
@@ -110,36 +120,31 @@ describe('socket connecting with a valid token', () => {
                 if (secondClientConnected) {
 
                     expect(users).to.be.eql([
-                        { username: user1.username, _id: user1._id.toString(), connected: true },
-                        { username: user2.username, _id: user2._id.toString(), connected: true }
+                        { username: user1.username, id: user1.id, connected: true },
+                        { username: user2.username, id: user2.id, connected: true }
                     ]);
 
                     clientSocket2.disconnect();
+                    clientSocket.disconnect();
 
                     done();                
                 } else {
 
                     expect(users).to.be.eql([
-                        { username: user1.username, _id: user1._id.toString(), connected: true },
-                        { username: user2.username, _id: user2._id.toString(), connected: false }
+                        { username: user1.username, id: user1.id, connected: true },
+                        { username: user2.username, id: user2.id, connected: false }
                     ]);
 
                     secondClientConnected = true;
                 }        
             });
-        })
-        .catch((err) => {
-
-            console.error(err);
         });
     });
 
     it('should emit an event "expired token" with no data ' +
         'when client emits any event and its token is expired', (done) => {
 
-        clientSocket.disconnect();
-
-        const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: 1 });
+        const token = jwt.sign(user1Data, jwtSecret, { expiresIn: 1 });
 
         clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
@@ -150,7 +155,7 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('expired token', (data) => {
 
-            expect(data).to.be.eql(undefined);
+            expect(data).to.be.equal(undefined);
 
             done();
         });
@@ -159,9 +164,7 @@ describe('socket connecting with a valid token', () => {
     it('should disconnect a socket ' +
         'when client emits any event and its token is expired', (done) => {
 
-        clientSocket.disconnect();
-
-        const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: 1 });
+        const token = jwt.sign(user1Data, jwtSecret, { expiresIn: 1 });
 
         clientSocket = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
@@ -172,7 +175,7 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('disconnect', (data) => {
 
-            expect(data).to.be.eql('io server disconnect');
+            expect(data).to.be.equal('io server disconnect');
 
             done();
         });
@@ -181,7 +184,7 @@ describe('socket connecting with a valid token', () => {
     it('should emit an event "expired token" with no data to all clients with expired token ' +
         'when another client emits a "message" event', (done) => {
 
-        const token = jwt.sign({ username: 'user1' }, jwtSecret, { expiresIn: 1 });
+        const token = jwt.sign(user2Data, jwtSecret, { expiresIn: 1 });
         const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         setTimeout(() => {
@@ -191,7 +194,7 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket2.on('expired token', (data) => {
 
-            expect(data).to.be.eql(undefined);
+            expect(data).to.be.equal(undefined);
 
             done();
         });
@@ -200,7 +203,7 @@ describe('socket connecting with a valid token', () => {
     it('should disconnect all clients with expired token ' +
         'when another client emits a "message" event', (done) => {
 
-        const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
+        const token = jwt.sign(user2Data, jwtSecret, { expiresIn: 1 });
         const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         setTimeout(() => {
@@ -210,7 +213,7 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket2.on('disconnect', (data) => {
 
-            expect(data).to.be.eql('io server disconnect');
+            expect(data).to.be.equal('io server disconnect');
 
             done();
         });
@@ -219,14 +222,17 @@ describe('socket connecting with a valid token', () => {
     it('should emit an "users" event with a valid users list after disconnecting all clients ' +
         'with expired tokens by emitting a "message" event', (done) => {
 
-        User.find(
-            {},
-            { username: true, _id: true },
-            { sort: { username: 1 } }
-        )
+        User.findAll({
+
+            attributes: ['username', 'id'],
+
+            order: [
+                ['username', 'ASC']
+            ]
+        })
         .then(([user1, user2]) => {
 
-            const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
+            const token = jwt.sign(user2Data, jwtSecret, { expiresIn: 1 });
             const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
@@ -241,31 +247,30 @@ describe('socket connecting with a valid token', () => {
                 if (++numberOfCalls === 3) {
 
                     expect(users).to.be.eql([
-                        { username: user1.username, _id: user1._id.toString(), connected: true },
-                        { username: user2.username, _id: user2._id.toString(), connected: false }
+                        { username: user1.username, id: user1.id, connected: true },
+                        { username: user2.username, id: user2.id, connected: false }
                     ]);
 
                     done();
                 }    
             });
-        })
-        .catch((err) => {
-
-            console.error(err);
         });
     });
 
     it('should emit an "users" event with a valid users list after disconnecting socket ' +
         'with an expired token when it was emitting some event', (done) => {
 
-        User.find(
-            {},
-            { username: true, _id: true },
-            { sort: { username: 1 } }
-        )
+        User.findAll({
+
+            attributes: ['username', 'id'],
+
+            order: [
+                ['username', 'ASC']
+            ]
+        })
         .then(([user1, user2]) => {
 
-            const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: 1 });
+            const token = jwt.sign(user2Data, jwtSecret, { expiresIn: 1 });
             const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
@@ -280,31 +285,30 @@ describe('socket connecting with a valid token', () => {
                 if (++numberOfCalls === 3) {
 
                     expect(users).to.be.eql([
-                        { username: user1.username, _id: user1._id.toString(), connected: true },
-                        { username: user2.username, _id: user2._id.toString(), connected: false }
+                        { username: user1.username, id: user1.id, connected: true },
+                        { username: user2.username, id: user2.id, connected: false }
                     ]);
 
                     done();
                 }
             });
-        })
-        .catch((err) => {
-
-            console.error(err);
         });
     });
 
     it('should emit an "users" event with a valid users list ' +
         'when some client has disconnected', (done) => {
 
-        User.find(
-            {},
-            { username: true, _id: true },
-            { sort: { username: 1 } }
-        )
+        User.findAll({
+
+            attributes: ['username', 'id'],
+
+            order: [
+                ['username', 'ASC']
+            ]
+        })
         .then(([user1, user2]) => {
 
-            const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: '1h' });
+            const token = jwt.sign(user2Data, jwtSecret, { expiresIn: '1h' });
             const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
             let numberOfCalls = 0;
@@ -314,8 +318,8 @@ describe('socket connecting with a valid token', () => {
                 if (++numberOfCalls === 3) {
 
                     expect(users).to.be.eql([
-                        { username: user1.username, _id: user1._id.toString(), connected: true },
-                        { username: user2.username, _id: user2._id.toString(), connected: false }
+                        { username: user1.username, id: user1.id, connected: true },
+                        { username: user2.username, id: user2.id, connected: false }
                     ]);
 
                     done();
@@ -324,10 +328,6 @@ describe('socket connecting with a valid token', () => {
                     clientSocket2.disconnect();
                 }
             });
-        })
-        .catch((err) => {
-
-            console.error(err);
         });
     });
 
@@ -341,7 +341,7 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('message validation error', (res) => {
 
-            expect(res).to.be.eql(error.message);
+            expect(res).to.be.equal(error.message);
 
             done();
         });
@@ -357,16 +357,12 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('message validation error', (res) => {
 
-            Message.find()
+            Message.findAll()
                 .then((messages) => {
 
                     expect(messages).to.have.lengthOf(0);
 
                     done();
-                })
-                .catch((err) => {
-
-                    console.error(err);
                 });
         });
     });
@@ -383,10 +379,15 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('message saved', (res) => {
 
-            expect(res.tempID).to.be.eql(data.tempID);
-            expect(res.message.author).to.be.eql('user1');
-            expect(res.message.content).to.be.eql('lorem ipsum');
-            expect(new Date(res.message.date)).to.not.equal('Invalid Date');
+            const { message } = res;
+
+            expect(res.tempID).to.be.equal(data.tempID);
+            expect(message.content).to.be.equal('lorem ipsum');
+            expect(new Date(message.date)).to.not.equal('Invalid Date');
+
+            expect(message.author).to.be.eql({
+                username: user1Data.username
+            });
 
             done();
         });
@@ -403,24 +404,26 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket.on('message saved', (res) => {
 
-            Message.findOne({ content: data.content, author: 'user1' })
-                .then((message) => {
+            Message.findOne({
+                
+                where: {
+                    content: data.content,
+                    authorId: user1Data.id
+                }
+            })
+            .then((message) => {
 
-                    expect(message).to.be.an('object');
+                expect(message).to.be.an('object');
 
-                    done();
-                })
-                .catch((err) => {
-
-                    console.error(err);
-                });
+                done();
+            });
         });
     });
 
     it('should emit a "message" event with a saved message object to all clients ' +
         'excepting client which sent a message', (done) => {
 
-        const token = jwt.sign({ username: 'user2' }, jwtSecret, { expiresIn: '1h' })
+        const token = jwt.sign(user2Data, jwtSecret, { expiresIn: '1h' })
         const clientSocket2 = clientIO.connect(`http://${ip}:${port}`, { query: { token } });
 
         const data = {
@@ -430,12 +433,20 @@ describe('socket connecting with a valid token', () => {
 
         clientSocket2.emit('message', data);
 
+        clientSocket2.on('message', () => {
+
+            throw new Error('This event should not be emitted');
+        });
+
         clientSocket.on('message', (res) => {
 
-            expect(res.tempID).to.be.eql(undefined);
-            expect(res.author).to.be.eql('user2');
-            expect(res.content).to.be.eql('lorem ipsum');
+            expect(res.tempID).to.be.equal(undefined);
+            expect(res.content).to.be.equal('lorem ipsum');
             expect(new Date(res.date)).to.not.equal('Invalid Date');
+
+            expect(res.author).to.be.eql({
+                username: user2Data.username
+            });
 
             done();
         });

@@ -2,14 +2,16 @@ const request = require('supertest');
 const expect = require('chai').expect;
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
+const ms = require('ms');
 
 const app = require('../index').app;
 const User = require('../models/User');
 const Message = require('../models/Message');
-const { createUsers, createMessages } = require('./functions');
+const { createUsers, createMessages, truncateTable } = require('./functions');
 const userSchema = require('../validationSchemas/user');
 const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
-const { jwtSecret } = require('../config');
+const messagesQueryUrlStringSchema = require('../validationSchemas/messagesUrlQueryString');
+const { jwtSecret, jwtTtl } = require('../config');
 
 describe('/users GET without an Authorization header', () => {
 
@@ -25,10 +27,6 @@ describe('/users GET without an Authorization header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -49,10 +47,6 @@ describe('/users GET with an invalid Authorization header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -73,10 +67,6 @@ describe('/users GET with an Authorization header other than Bearer', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -92,15 +82,36 @@ describe('/users GET with an invalid token', () => {
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'expired or invalid token'
+                    message: 'invalid token'
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
+    });
+});
+
+describe('/users GET with an expired token', () => {
+
+    it('should respond with a JSON with a message "expired token"', (done) => {
+
+        const token = jwt.sign({}, jwtSecret, { expiresIn: 1 });
+
+        setTimeout(() => {
+
+            request(app)
+                .get('/users')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(401)
+                .then((res) => {
+
+                    expect(res.body).to.be.eql({
+                        message: 'expired token'
+                    });
+
+                    done();
+                });
+
+        }, 1010);  
     });
 });
 
@@ -110,28 +121,16 @@ describe('/users GET with a valid token', () => {
 
     let token;
 
-    before((done) => {
+    before(async () => {
 
         token = jwt.sign({}, jwtSecret, { expiresIn: '1h' });
 
-        User.collection.drop(() => {
-
-            createUsers(numberOfUsers).then(() => {
-
-                done();
-            }).catch((err) => {
-
-                console.error(err);
-            });
-        });
+        await createUsers(numberOfUsers); 
     });
 
-    after((done) => {
+    after(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
     it('should respond with all users', (done) => {
@@ -146,14 +145,10 @@ describe('/users GET with a valid token', () => {
                 expect(res.body).to.have.lengthOf(numberOfUsers);
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
-    it('should respond with users only with _id and username', (done) => {
+    it('should respond with users only with id and username', (done) => {
 
         request(app)
             .get('/users')
@@ -163,18 +158,14 @@ describe('/users GET with a valid token', () => {
 
                 res.body.forEach((user) => {
 
-                    expect(user).to.have.all.keys(['_id', 'username']);
+                    expect(user).to.have.all.keys(['id', 'username']);
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
-    it('should respond with users with _id\'s which are strings', (done) => {
+    it('should respond with users with id\'s which are numbers', (done) => {
 
         request(app)
             .get('/users')
@@ -184,14 +175,10 @@ describe('/users GET with a valid token', () => {
 
                 res.body.forEach((user) => {
 
-                    expect(user._id).to.be.a('string');
+                    expect(user.id).to.be.a('number');
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -209,30 +196,47 @@ describe('/users GET with a valid token', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
+            });
+    });
 
-                console.error(err);
+    it('should respond with users sorted by username ascending', (done) => {
+
+        request(app)
+            .get('/users')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                const sortedUsers = res.body.slice().sort((a, b) => {
+
+                    const aUsername = a.username;
+                    const bUsername = b.username;
+
+                    if (aUsername === bUsername) {
+
+                        return 0;
+                    }
+
+                    return (aUsername > bUsername) ? 1 : -1;
+                });
+
+                expect(res.body).to.be.eql(sortedUsers);
+
+                done();
             });
     });
 });
 
 describe('/users POST', () => {
 
-    before((done) => {
+    before(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
-    afterEach((done) => {
+    afterEach(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
     it('should respond with a JSON message if request body is empty', (done) => {
@@ -250,10 +254,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -273,10 +273,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -296,10 +292,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -323,10 +315,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -350,10 +338,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -378,10 +362,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -406,10 +386,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -434,10 +410,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -462,10 +434,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -490,10 +458,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -517,10 +481,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -545,10 +505,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -573,10 +529,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -601,10 +553,6 @@ describe('/users POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -631,11 +579,7 @@ describe('/users POST', () => {
 
                         done();
                     })
-            })
-            .catch((err) => {
-
-                console.error(err);
-            });        
+            });
     });
 
     it('shouldn\'t create a user if request body is invalid', (done) => {
@@ -649,16 +593,12 @@ describe('/users POST', () => {
             .expect(400)
             .then((res) => {
 
-                return User.find({}).then((users) => {
+                return User.findAll({}).then((users) => {
 
                     expect(users).to.have.lengthOf(0);
 
                     done();
                 });
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -677,21 +617,20 @@ describe('/users POST', () => {
             .expect(201)
             .then((res) => {
 
-                return User.findOne({ username, password }).then((user) => {
+                return User.findOne({
+                    where: { username, password } 
+                })
+                .then((user) => {
 
                     expect(user.username).to.be.eql(username);
                     expect(user.password).to.be.eql(hashedPassowrd);
 
                     done();
                 });
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
-    it('should respond with username and _id of created user', (done) => {
+    it('should respond with username and id of created user', (done) => {
 
         request(app)
             .post('/users')
@@ -704,47 +643,31 @@ describe('/users POST', () => {
 
                 return User.findOne().then((user) => {
 
-                    expect(res.body).to.have.all.keys(['username', '_id']);
+                    expect(res.body).to.have.all.keys(['username', 'id']);
                     expect(res.body.username).to.be.eql(user.username);
-                    expect(res.body._id).to.be.eql(user._id.toString());
+                    expect(res.body.id).to.be.eql(user.id);
 
                     done();
                 });
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
 
 describe('/users/username-availability POST', () => {
 
-    before((done) => {
+    before(async () => {
 
-        User.collection.drop(() => {
+        await truncateTable(User);
 
-            User.create({
-                username: 'user',
-                password: 'zaq1@WSX'
-            })
-            .then(() => {
-
-                done();
-            })
-            .catch((err) => {
-
-                console.error(err);
-            });
+        await User.create({
+            username: 'user',
+            password: 'zaq1@WSX'
         });
     });
 
-    after((done) => {
+    after(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
     it('should respond with a JSON with a "free" field with false value ' + 
@@ -762,10 +685,6 @@ describe('/users/username-availability POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -784,10 +703,6 @@ describe('/users/username-availability POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -805,16 +720,13 @@ describe('/users/username-availability POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
     it('should resposnd with a JSON error if username is not a string', (done) => {
 
         const reqBody = { username: true };
+        const { error } = Joi.validate(reqBody, usernameAvailabilityRequestSchema);
 
         request(app)
             .post('/users/username-availability')
@@ -822,23 +734,18 @@ describe('/users/username-availability POST', () => {
             .expect(400)
             .then((res) => {
 
-                const { error } = Joi.validate(reqBody, usernameAvailabilityRequestSchema);
-
                 expect(res.body).to.be.eql({
                     message: error.message
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
     it('should resposnd with a JSON error if username is not sent', (done) => {
 
         const reqBody = {};
+        const { error } = Joi.validate(reqBody, usernameAvailabilityRequestSchema);
 
         request(app)
             .post('/users/username-availability')
@@ -846,17 +753,11 @@ describe('/users/username-availability POST', () => {
             .expect(400)
             .then((res) => {
 
-                const { error } = Joi.validate(reqBody, usernameAvailabilityRequestSchema);
-
                 expect(res.body).to.be.eql({
                     message: error.message
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -875,10 +776,6 @@ describe('/messages GET without an Authorization header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -899,10 +796,6 @@ describe('/messages GET with an invalid Authorization header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -923,10 +816,6 @@ describe('/messages GET with an Authorization header other than Bearer', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -942,15 +831,36 @@ describe('/messages GET with an invalid token', () => {
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'expired or invalid token'
+                    message: 'invalid token'
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
+    });
+});
+
+describe('/messages GET with an expired token', () => {
+
+    it('should respond with a JSON with a message "expired token"', (done) => {
+
+        const token = jwt.sign({}, jwtSecret, { expiresIn: 1 });
+
+        setTimeout(() => {
+
+            request(app)
+                .get('/messages')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(401)
+                .then((res) => {
+
+                    expect(res.body).to.be.eql({
+                        message: 'expired token'
+                    });
+
+                    done();
+                });
+
+        }, 1010);
     });
 });
 
@@ -960,50 +870,124 @@ describe('/messages GET with a valid token', () => {
 
     let token;
 
-    before((done) => {
+    before(async () => {
 
         token = jwt.sign({}, jwtSecret, { expiresIn: '1h' });
 
-        Message.collection.drop(() => {
+        await Promise.all([
+            truncateTable(User),
+            truncateTable(Message)
+        ]);
 
-            createMessages(numberOfMessages).then(() => {
-
-                done();
-            }).catch((err) => {
-
-                console.error(err);
-            });
+        const user = await User.create({
+            username: 'user',
+            password: 'zaq1@WSX'
         });
+
+        await createMessages(numberOfMessages, user);
     });
 
-    after((done) => {
+    after(async () => {
 
-        Message.collection.drop(() => {
-
-            done();
-        });
+        await Promise.all([
+            truncateTable(User),
+            truncateTable(Message)
+        ]);
     });
 
-    it('should respond with a JSON with a message if GET variable "before" is invalid', (done) => {
+    it('should respond with a JSON with a message' +
+        'if GET variable "before" is not a positive number', (done) => {
+
+        const query = {
+            before: '-10'
+        };
+
+        const { error } = Joi.validate(query, messagesQueryUrlStringSchema);
 
         request(app)
             .get('/messages')
             .set('Authorization', `Bearer ${token}`)
-            .query({
-                before: 'lorem_ipsum'
-            })
-            .expect(500)
+            .query(query)
+            .expect(400)
             .then((res) => {
 
                 expect(res.body).to.be.eql({
-                    message: 'something went wrong'
+                    message: error.message
                 });
 
                 done();
-            })
-            .catch((err) => {
+            });
+    });
 
-                console.error(err);
+    it('should respond with a JSON with a message' +
+        'if GET variable "limit" is not a positive number', (done) => {
+
+        const query = {
+            limit: '-10'
+        };
+
+        const { error } = Joi.validate(query, messagesQueryUrlStringSchema);
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .query(query)
+            .expect(400)
+            .then((res) => {
+
+                expect(res.body).to.be.eql({
+                    message: error.message
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with a JSON with a message' +
+        'if GET variable "skip" is not a positive number', (done) => {
+
+        const query = {
+            skip: '-10'
+        };
+
+        const { error } = Joi.validate(query, messagesQueryUrlStringSchema);
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .query(query)
+            .expect(400)
+            .then((res) => {
+    
+                expect(res.body).to.be.eql({
+                    message: error.message
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with a JSON with a message' +
+        'if unknown GET variable is provided', (done) => {
+
+        const query = {
+            unknownVariable: '10'
+        };
+
+        const { error } = Joi.validate(query, messagesQueryUrlStringSchema);
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .query(query)
+            .expect(400)
+            .then((res) => {
+
+                expect(res.body).to.be.eql({
+                    message: error.message
+                });
+
+                done();
             });
     });
 
@@ -1019,14 +1003,108 @@ describe('/messages GET with a valid token', () => {
                 expect(res.body).to.have.lengthOf(numberOfMessages);
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
-    it('shoudl respond with an array with messages sorted by time ascending', (done) => {
+    it('should respond with messages objects ' +
+        'which have id, content, date and author keys', (done) => {
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                res.body.forEach((message) => {
+
+                    expect(message).to.have.all.keys(
+                        ['id', 'content', 'date', 'author']
+                    );
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with messages objects ' +
+        'which id\'s are numbers', (done) => {
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                res.body.forEach((message) => {
+
+                    expect(message.id).to.be.a('number');
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with messages objects ' +
+        'which contents are strings', (done) => {
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                res.body.forEach((message) => {
+
+                    expect(message.content).to.be.a('string');
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with messages objects ' +
+        'which creation dates are valid', (done) => {
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                res.body.forEach((message) => {
+
+                    const dateString = new Date(message.date).toString();
+
+                    expect(dateString).to.be.not.equal('Invalid Date');
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with messages objects ' +
+        'which authors are objects with username field with string value', (done) => {
+
+        request(app)
+            .get('/messages')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then((res) => {
+
+                res.body.forEach((message) => {
+
+                    const { author } = message;
+
+                    expect(author).to.be.an('object');
+                    expect(author).to.have.all.keys(['username']);
+                    expect(author.username).to.be.a('string');
+                });
+
+                done();
+            });
+    });
+
+    it('should respond with an array with messages sorted by time ascending', (done) => {
 
         request(app)
             .get('/messages')
@@ -1041,16 +1119,14 @@ describe('/messages GET with a valid token', () => {
                 expect(res.body).to.be.an('array');
 
                 res.body.reduce((prev, current) => {
-                    expect(prev._id < current._id).to.be.eql(true);
+
+                    expect(prev.id < current.id).to.be.eql(true);
 
                     return current;
-                }, { _id: '' });
+
+                }, { id: 0 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1058,61 +1134,50 @@ describe('/messages GET with a valid token', () => {
 
         const skip = 3;
 
-        Message.find({}, {}, {
-            sort: {
-                _id: 1
-            }
+        Message.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
         })
         .then((messages) => {
 
             return request(app)
                 .get('/messages')
                 .set('Authorization', `Bearer ${token}`)
-                .query({
-                    skip
-                })
+                .query({ skip })
                 .expect(200)
                 .then((res) => {
 
                     expect(res.body).to.be.an('array');
                     expect(res.body).to.have.lengthOf(numberOfMessages - skip);
-                    expect(res.body[0]._id).to.be.eql(messages[0]._id.toString());
+                    expect(res.body[0].id).to.be.eql(messages[0].id);
 
                     done();
                 });
-        })
-        .catch((err) => {
-            console.error(err);
         });
     });
 
-    it('shouldn\'t skip any record if GET variable "skip" is not a number', (done) => {
+    it('shouldn\'t skip any record if GET variable "skip" is not provided', (done) => {
 
-        Message.find({}, {}, {
-            sort: {
-                _id: 1
-            }
+        Message.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
         })
         .then((messages) => {
 
             return request(app)
                 .get('/messages')
                 .set('Authorization', `Bearer ${token}`)
-                .query({
-                    skip: 'lorem ipsum'
-                })
                 .expect(200)
                 .then((res) => {
 
                     expect(res.body).to.be.an('array');
                     expect(res.body).to.have.lengthOf(numberOfMessages);
-                    expect(res.body[0]._id).to.be.eql(messages[0]._id.toString());
+                    expect(res.body[0].id).to.be.eql(messages[0].id);
 
                     done();
                 });
-        })
-        .catch((err) => {
-            console.error(err);
         });
     });
 
@@ -1120,121 +1185,96 @@ describe('/messages GET with a valid token', () => {
 
         const limit = 10;
 
-        Message.find({}, {}, {
-            sort: {
-                _id: 1
-            }
+        Message.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
         })
         .then((messages) => {
 
             return request(app)
                 .get('/messages')
                 .set('Authorization', `Bearer ${token}`)
-                .query({
-                    limit
-                })
+                .query({ limit })
                 .expect(200)
                 .then((res) => {
 
                     expect(res.body).to.be.an('array');
                     expect(res.body).to.have.lengthOf(limit);
-                    expect(res.body[0]._id).to.be.eql(messages[numberOfMessages - limit]._id.toString());
+                    expect(res.body[0].id).to.be.eql(messages[numberOfMessages - limit].id);
 
                     done();
                 });
-        })
-        .catch((err) => {
-            console.error(err);
         });
     });
 
-    it('shouldn\'t limit records if GET variable "limit" is not a number', (done) => {
+    it('shouldn\'t limit records if GET variable "limit" is not provided', (done) => {
 
-        Message.find({}, {}, {
-            sort: {
-                _id: 1
-            }
+        Message.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
         })
         .then((messages) => {
 
             return request(app)
                 .get('/messages')
                 .set('Authorization', `Bearer ${token}`)
-                .query({
-                    skip: 'lorem ipsum'
-                })
                 .expect(200)
                 .then((res) => {
 
                     expect(res.body).to.be.an('array');
                     expect(res.body).to.have.lengthOf(numberOfMessages);
-                    expect(res.body[0]._id).to.be.eql(messages[0]._id.toString());
+                    expect(res.body[0].id).to.be.eql(messages[0].id);
 
                     done();
                 });
-        })
-        .catch((err) => {
-            console.error(err);
         });
     });
 
     it('should respond with records older than a record with specified ID', (done) => {
 
-        Message.find({}, {}, {
-            sort: {
-                _id: 1
-            }
+        Message.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
         })
         .then((messages) => {
             const index = Math.floor(numberOfMessages / 2);
-            const id = messages[index]._id.toString();
+            const id = messages[index].id;
 
             return request(app)
                 .get('/messages')
                 .set('Authorization', `Bearer ${token}`)
-                .query({
-                    before: id
-                })
+                .query({ before: id })
                 .expect(200)
                 .then((res) => {
 
                     expect(res.body).to.be.an('array');
                     expect(res.body).to.have.lengthOf(index);
-                    expect(res.body[0]._id).to.be.eql(messages[0]._id.toString());
+                    expect(res.body[0].id).to.be.eql(messages[0].id);
 
                     done();
                 });
-        })
-        .catch((err) => {
-            console.error(err);
         });
     });
 });
 
 describe('/auth POST', () => {
 
-    before((done) => {
+    before(async () => {
 
-        User.create({
+        await truncateTable(User);
+
+        await User.create({
             username: 'userName',
             password: 'zaq1@WSX'
-        })
-        .then(() => {
-
-            done();
-        })
-        .catch((err) => {
-
-            console.error(err);
         });
     });
 
-    after((done) => {
+    after(async () => {
 
-        User.collection.drop(() => {
-
-            done();
-        });
+        await truncateTable(User);
     });
 
     it('should respond with a JSON message if request body is empty', (done) => {
@@ -1252,10 +1292,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1275,10 +1311,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1298,10 +1330,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1325,10 +1353,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1352,10 +1376,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1376,10 +1396,6 @@ describe('/auth POST', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
@@ -1402,14 +1418,11 @@ describe('/auth POST', () => {
                 jwt.verify(token, jwtSecret);
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 
-    it('should respond with a JWT token valid for the next 24 hours', (done) => {
+    it(`should respond with a JWT token valid for the next ` +
+        `${isNaN(jwtTtl) ? jwtTtl : ms(jwtTtl)}`, (done) => {
 
         request(app)
             .post('/auth')
@@ -1426,14 +1439,11 @@ describe('/auth POST', () => {
                 expect(token).to.be.a('string');
 
                 const { iat, exp } = jwt.verify(token, jwtSecret);
+                const timeDiff = (exp - iat) * 1000;
 
-                expect(exp - iat).to.be.eql(60 * 60 * 24);
+                expect(timeDiff).to.be.eql(isNaN(jwtTtl) ? ms(jwtTtl) : jwtTtl);
 
                 done();     
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -1452,10 +1462,6 @@ describe('/not-existing-route without an auth header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });
@@ -1482,10 +1488,6 @@ describe('/not-existing-route with an auth header', () => {
                 });
 
                 done();
-            })
-            .catch((err) => {
-
-                console.error(err);
             });
     });
 });

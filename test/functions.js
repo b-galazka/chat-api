@@ -1,15 +1,17 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
+const db = require('../db');
 
 const createUsers = (numberOfRecordsToCreate) => {
 
-    let promises = [];
+    const promises = [];
 
-    for (let i = 0; i < numberOfRecordsToCreate; i++) {
+    for (let i = 1; i <= numberOfRecordsToCreate; i++) {
 
         const promise = User.create({
             username: `user ${i}`,
-            password: 'password'
+            password: 'password',
+            id: i
         });
 
         promises.push(promise);
@@ -18,14 +20,14 @@ const createUsers = (numberOfRecordsToCreate) => {
     return Promise.all(promises);
 };
 
-const createMessages = (numberOfRecordsToCreate) => {
+const createMessages = (numberOfRecordsToCreate, messagesAuthor) => {
 
-    let promises = [];
+    const promises = [];
 
     for (let i = 0; i < numberOfRecordsToCreate; i++) {
 
         const promise = Message.create({
-            author: `user ${i}`,
+            authorId: messagesAuthor.id,
             content: 'Lorem ipsum dolor sit.'
         });
 
@@ -35,7 +37,19 @@ const createMessages = (numberOfRecordsToCreate) => {
     return Promise.all(promises);
 };
 
+const truncateTable = model => db.transaction(async (transaction) => {
+
+    const options = { transaction };
+
+    await db.query('SET FOREIGN_KEY_CHECKS = 0', options);
+
+    await model.truncate(options);
+
+    await db.query('SET FOREIGN_KEY_CHECKS = 1', options);
+});
+
 module.exports = {
     createMessages,
-    createUsers
+    createUsers,
+    truncateTable
 };
