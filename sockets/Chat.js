@@ -101,9 +101,7 @@ class ChatSocket {
 
             if (User.isTokenExpired(tokenData)) {
 
-                this._disconnectSocket(socket);
-
-                return this._sendUsersList();
+                return this._disconnectSocket(socket);
             }
 
             next();
