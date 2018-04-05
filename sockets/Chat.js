@@ -35,6 +35,8 @@ class ChatSocket {
 
             try {
 
+                this._disconnectSocketsWithExpiredTokens();
+
                 const connectedUsers = this._connectedUsers.slice();
 
                 const users = await User.loadAlphabeticalList();
@@ -89,8 +91,6 @@ class ChatSocket {
                 this._disconnectSocket(socket);
             }
         });
-
-        this._sendUsersList();
     }
 
     _setTokenExpirationMiddleware(socket) {
@@ -141,11 +141,15 @@ class ChatSocket {
 
                 const savedMessage = await Message.create({ authorId, content });
 
-                socket.broadcast.emit('message', savedMessage);
+                const savedMessageFullData = await Message.findSavedMessageFullData(
+                    savedMessage.id
+                );
+
+                socket.broadcast.emit('message', savedMessageFullData);
 
                 socket.emit('message saved', {
                     tempID: message.tempID,
-                    message: savedMessage
+                    message: savedMessageFullData
                 });
             } catch (err) {
 

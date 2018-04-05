@@ -84,6 +84,19 @@ Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
     return messages.reverse();
 };
 
+Message.findSavedMessageFullData = id => Message.findById(id, {
+
+    attributes: ['id', 'content', 'date'],
+
+    include: [
+        {
+            model: User,
+            as: 'author',
+            attributes: ['username']
+        }
+    ]
+});
+
 Message.hook('beforeValidate', trimStrings);
 
 module.exports = Message;
