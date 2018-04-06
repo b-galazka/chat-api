@@ -8,7 +8,9 @@ module.exports = async (req, res, next) => {
     
     try {
 
-        const user = await User.findOne({ username });
+        const user = await User.findOne({
+            where: { username }
+        });
 
         if (user) {
 

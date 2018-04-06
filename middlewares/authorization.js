@@ -1,8 +1,10 @@
+const { TokenExpiredError } = require('jsonwebtoken');
+
 const User = require('../models/User');
 
 const validateAuthHeader = (authHeader) => {
 
-    if (!authHeader) {
+    if (authHeader === undefined) {
 
         return 'no authorization header provided';
     }
@@ -39,8 +41,12 @@ module.exports = async (req, res, next) => {
 
         console.error(err);
 
+        const tokenStatus = (
+            (err instanceof TokenExpiredError) ? 'expired' : 'invalid'
+        );
+
         return res.status(401).send({
-            message: 'expired or invalid token'
+            message: `${tokenStatus} token`
         });
     }
 };

@@ -1,8 +1,8 @@
 const Joi = require('joi');
 
-module.exports = requestBodySchema => (req, res, next) => {
+module.exports = urlQueryObjectSchema => (req, res, next) => {
 
-    const { error } = Joi.validate(req.body, requestBodySchema);
+    const { error } = Joi.validate(req.query, urlQueryObjectSchema);
 
     if (error) {
 

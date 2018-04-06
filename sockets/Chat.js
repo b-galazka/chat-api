@@ -23,7 +23,7 @@ class ChatSocket {
 
             this._setTokenExpirationMiddleware(socket);
             this._setOnDisconnectHandler(socket);
-            this._setOnMessageHandler(socket);        
+            this._setOnMessageHandler(socket);
         });
 
         return this;
@@ -35,12 +35,14 @@ class ChatSocket {
 
             try {
 
+                this._disconnectSocketsWithExpiredTokens();
+
                 const connectedUsers = this._connectedUsers.slice();
 
                 const users = await User.loadAlphabeticalList();
 
                 const usersList = users.map(user => ({
-                    _id: user._id,
+                    id: user.id,
                     username: user.username,
                     connected: connectedUsers.includes(user.username)
                 }));
@@ -51,7 +53,7 @@ class ChatSocket {
                 console.error(err);
 
                 this._io.emit('users error');
-            }    
+            }
         })();
     }
 
@@ -89,8 +91,6 @@ class ChatSocket {
                 this._disconnectSocket(socket);
             }
         });
-
-        this._sendUsersList();
     }
 
     _setTokenExpirationMiddleware(socket) {
@@ -101,9 +101,7 @@ class ChatSocket {
 
             if (User.isTokenExpired(tokenData)) {
 
-                this._disconnectSocket(socket);
-
-                return this._sendUsersList();
+                return this._disconnectSocket(socket);
             }
 
             next();
@@ -123,7 +121,7 @@ class ChatSocket {
 
     _setOnMessageHandler(socket) {
 
-        const { username } = socket.handshake.tokenData;
+        const { username, id: authorId } = socket.handshake.tokenData;
 
         socket.on('message', async (message) => {
 
@@ -139,13 +137,17 @@ class ChatSocket {
                     return socket.emit('message validation error', error.message);
                 }
 
-                const savedMessage = await Message.create({ author: username, content });
+                const savedMessage = await Message.create({ authorId, content });
 
-                socket.broadcast.emit('message', savedMessage);
+                const savedMessageFullData = await Message.findSavedMessageFullData(
+                    savedMessage.id
+                );
+
+                socket.broadcast.emit('message', savedMessageFullData);
 
                 socket.emit('message saved', {
                     tempID: message.tempID,
-                    message: savedMessage
+                    message: savedMessageFullData
                 });
             } catch (err) {
 

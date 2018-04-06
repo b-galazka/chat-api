@@ -1,10 +1,8 @@
 const router = require('express').Router();
-const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
 const authCredentialsSchema = require('../validationSchemas/authCredentials');
 const validateRequestBody = require('../middlewares/validateRequestBody');
-const { jwtSecret, jwtTtl } = require('../config');
 
 router.post('/', validateRequestBody(authCredentialsSchema));
 
@@ -14,30 +12,20 @@ router.post('/', async (req, res) => {
 
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username, password });
+        const token = await User.generateToken({ username, password });
 
-        if (user) {
+        res.send({ token });
 
-            const { username, _id } = user;
-
-            jwt.sign({ username, _id }, jwtSecret, { expiresIn: jwtTtl }, (err, token) => {
-                
-                if (err) {
-
-                    throw err;
-                }
-
-                res.send({ token });
-            });
-        } else {
-
-            res.status(403).send({
-                message: 'wrong username or password'
-            });
-        }
     } catch (err) {
 
         console.error(err);
+
+        if (err.message === 'invalid credentials') {
+
+            return res.status(403).send({
+                message: 'wrong username or password'
+            });
+        }
 
         res.status(500).send({
             message: 'something went wrong'

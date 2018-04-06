@@ -1,3 +1,5 @@
+const { TokenExpiredError } = require('jsonwebtoken');
+
 const User = require('../models/User');
 
 module.exports = async (socket, next) => {
@@ -6,7 +8,12 @@ module.exports = async (socket, next) => {
 
     try {
 
-        await User.verifyToken(token);
+        if (token === undefined) {
+
+            return next(new Error('no token provided'));
+        }
+
+        socket.handshake.tokenData = await User.verifyToken(token);
 
         next();
 
@@ -14,6 +21,10 @@ module.exports = async (socket, next) => {
 
         console.error(err);
 
-        next(new Error('invalid token or no token provided'));
+        const tokenStatus = (
+            (err instanceof TokenExpiredError) ? 'expired' : 'invalid'
+        );
+
+        next(new Error(`${tokenStatus} token provided`));
     }
 };
