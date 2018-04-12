@@ -3,6 +3,8 @@ const Joi = require('joi');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const messageSchema = require('../validationSchemas/message');
+const fileInfoSchema = require('../validationSchemas/fileInfo');
+const FileUpload = require('../tools/FileUpload');
 
 class ChatSocket {
 
@@ -10,6 +12,7 @@ class ChatSocket {
 
         this._io = io;
         this._connectedUsers = [];
+        this._activeFilesUploads = new Map();
     }
 
     init() {
@@ -24,6 +27,7 @@ class ChatSocket {
             this._setTokenExpirationMiddleware(socket);
             this._setOnDisconnectHandler(socket);
             this._setOnMessageHandler(socket);
+            this._setOnStartFileUploadHandler(socket);
         });
 
         return this;
@@ -155,6 +159,25 @@ class ChatSocket {
 
                 socket.emit('sending error', message.tempID);
             }
+        });
+    }
+
+    _setOnStartFileUploadHandler(socket) {
+
+        socket.on('start file upload', (fileInfo) => {
+
+            const { error } = Joi.validate(fileInfo, fileInfoSchema);
+
+            if (error) {
+
+                return socket.emit('file info validation error', error.message);
+            }
+
+            const fileUpload = new FileUpload(fileInfo);
+
+            this._activeFilesUploads.set(fileUpload.id, fileUpload);
+
+            socket.emit('file upload started', fileUpload.id);
         });
     }
 }
