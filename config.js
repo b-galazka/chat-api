@@ -38,7 +38,7 @@ module.exports = {
 
     allowedDomains: ALLOWED_DOMAINS ? ALLOWED_DOMAINS.split(',') : [],
 
-    uploadsDir: path.resolve(__dirname, UPLOADS_DIR || './uploaded_files'),
+    uploadsDir: path.resolve(UPLOADS_DIR || './uploaded_files'),
     maxUploadedFileSize: +MAX_UPLOADED_FILE_SIZE || 10485760,
     fileUploadTimeout: +FILE_UPLOAD_TIMEOUT || 60000
 };
