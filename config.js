@@ -1,3 +1,5 @@
+const path = require('path');
+
 const configureDotenv = require('./functions/configureDotenv');
 
 configureDotenv();
@@ -13,7 +15,8 @@ const {
     DB_USER,
     DB_PASS,
     DB_HOST,
-    DOMAIN
+    DOMAIN,
+    UPLOADS_DIR
 } = process.env;
 
 module.exports = {
@@ -31,5 +34,7 @@ module.exports = {
 
     jwtTtl: JWT_TTL || '24h',
 
-    allowedDomains: ALLOWED_DOMAINS ? ALLOWED_DOMAINS.split(',') : []
+    allowedDomains: ALLOWED_DOMAINS ? ALLOWED_DOMAINS.split(',') : [],
+
+    uploadsDir: path.resolve(__dirname, UPLOADS_DIR || './uploaded_files')
 };
