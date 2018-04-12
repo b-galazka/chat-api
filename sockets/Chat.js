@@ -132,9 +132,9 @@ class ChatSocket {
             try {
 
                 this._disconnectSocketsWithExpiredTokens();
-
-                const { tempID, content } = message;
+        
                 const { error } = Joi.validate(message, messageSchema);
+                const { tempID, content } = message;
 
                 if (error) {
 
