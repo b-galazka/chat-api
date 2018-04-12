@@ -17,7 +17,8 @@ const {
     DB_HOST,
     DOMAIN,
     UPLOADS_DIR,
-    MAX_UPLOADED_FILE_SIZE
+    MAX_UPLOADED_FILE_SIZE,
+    FILE_UPLOAD_TIMEOUT
 } = process.env;
 
 module.exports = {
@@ -38,5 +39,6 @@ module.exports = {
     allowedDomains: ALLOWED_DOMAINS ? ALLOWED_DOMAINS.split(',') : [],
 
     uploadsDir: path.resolve(__dirname, UPLOADS_DIR || './uploaded_files'),
-    maxUploadedFileSize: +MAX_UPLOADED_FILE_SIZE || 10485760
+    maxUploadedFileSize: +MAX_UPLOADED_FILE_SIZE || 10485760,
+    fileUploadTimeout: +FILE_UPLOAD_TIMEOUT || 60000
 };

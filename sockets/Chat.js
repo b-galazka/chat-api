@@ -175,6 +175,13 @@ class ChatSocket {
 
             const fileUpload = new FileUpload(fileInfo);
 
+            fileUpload.once('timeout', () => {
+
+                this._activeFilesUploads.delete(fileUpload.id);
+
+                socket.emit('file upload timeout');
+            });
+
             this._activeFilesUploads.set(fileUpload.id, fileUpload);
 
             socket.emit('file upload started', fileUpload.id);
