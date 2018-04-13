@@ -162,7 +162,7 @@ class ChatSocket {
 
                 console.error(err);
 
-                socket.emit('sending error', message.tempID);
+                socket.emit('message sending error', { tempID: message.tempID });
             }
         });
     }
@@ -175,7 +175,10 @@ class ChatSocket {
 
             if (error) {
 
-                return socket.emit('file info validation error', error.message);
+                return socket.emit('file info validation error', {
+                    tempId: uploadInfo && uploadInfo.tempId,
+                    message: error.message
+                });
             }
 
             const { fileInfo, tempId } = uploadInfo;
@@ -185,7 +188,7 @@ class ChatSocket {
 
                 this._activeFilesUploads.delete(fileUpload.id);
 
-                socket.emit('file upload timeout');
+                socket.emit('file upload timeout', { tempId });
             });
 
             this._activeFilesUploads.set(fileUpload.id, fileUpload);
@@ -205,15 +208,21 @@ class ChatSocket {
 
             if (error) {
 
-                return socket.emit('uploading file part error', error.message);
+                return socket.emit('uploading file part error', {
+                    uploadId: uploadData && uploadData.id,
+                    message: error.message
+                });
             }
 
-            const { id, data } = uploadData;
+            const { id: uploadId, data } = uploadData;
             const fileUpload = this._activeFilesUploads.get(id);
 
             if (!fileUpload) {
 
-                return socket.emit('uploading file part error', 'invalid ID');
+                return socket.emit('uploading file part error', {
+                    uploadId,
+                    message: 'invalid ID'
+                });
             }
 
             await fileUpload.writeFile(data);
