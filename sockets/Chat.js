@@ -3,7 +3,8 @@ const Joi = require('joi');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const messageSchema = require('../validationSchemas/message');
-const fileInfoSchema = require('../validationSchemas/fileInfo');
+const uploadInfoSchema = require('../validationSchemas/uploadInfo');
+const uploadFilePartDataSchema = require('../validationSchemas/uploadFilePartData');
 const FileUpload = require('../tools/FileUpload');
 
 class ChatSocket {
@@ -28,6 +29,7 @@ class ChatSocket {
             this._setOnDisconnectHandler(socket);
             this._setOnMessageHandler(socket);
             this._setOnStartFileUploadHandler(socket);
+            this._setOnUploadFilePartHandler(socket);
         });
 
         return this;
@@ -164,15 +166,16 @@ class ChatSocket {
 
     _setOnStartFileUploadHandler(socket) {
 
-        socket.on('start file upload', (fileInfo) => {
+        socket.on('start file upload', (uploadInfo) => {
 
-            const { error } = Joi.validate(fileInfo, fileInfoSchema);
+            const { error } = Joi.validate(uploadInfo, uploadInfoSchema);
 
             if (error) {
 
                 return socket.emit('file info validation error', error.message);
             }
 
+            const { fileInfo, tempId } = uploadInfo;
             const fileUpload = new FileUpload(fileInfo);
 
             fileUpload.once('timeout', () => {
@@ -184,7 +187,45 @@ class ChatSocket {
 
             this._activeFilesUploads.set(fileUpload.id, fileUpload);
 
-            socket.emit('file upload started', fileUpload.id);
+            socket.emit('file upload started', {
+                tempId,
+                uploadId: fileUpload.id
+            });
+        });
+    }
+
+    _setOnUploadFilePartHandler(socket) {
+
+        socket.on('upload file part', async (uploadData) => {
+
+            const { error } = Joi.validate(uploadData, uploadFilePartDataSchema);
+
+            if (error) {
+
+                return socket.emit('uploading file part error', error.message);
+            }
+
+            const { id, data } = uploadData;
+            const fileUpload = this._activeFilesUploads.get(id);
+
+            if (!fileUpload) {
+
+                return socket.emit('uploading file part error', 'invalid ID');
+            }
+
+            await fileUpload.writeFile(data);
+
+            if (fileUpload.isFinished()) {
+
+                // todo: save records to DB
+
+            } else {
+
+                socket.emit('file part uploaded', {
+                    id,
+                    uploadedBytes: fileUpload.writtenBytes
+                });
+            }
         });
     }
 }
