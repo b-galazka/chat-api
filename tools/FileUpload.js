@@ -14,9 +14,8 @@ class FileUpload extends EventEmitter {
         this.id = cuid();
         this.writtenBytes = 0;
         this.fileInfo = this._getFileInfo(fileInfo);
-        this.filePath = path.resolve(uploadsDir, this.id + this.fileInfo.extension);
 
-        this._writeStream = fs.createWriteStream(this.filePath);
+        this._writeStream = fs.createWriteStream(this.fileInfo.path);
 
         this._initTimeoutEvent();
     }
@@ -53,12 +52,14 @@ class FileUpload extends EventEmitter {
     _getFileInfo({ name, type, size }) {
 
         const lastDotPosition = name.lastIndexOf('.');
+        const extension = name.slice(lastDotPosition);
 
         return {
+            path: path.resolve(uploadsDir, this.id + extension),
             name: name.slice(0, lastDotPosition),
-            extension: name.slice(lastDotPosition),
+            extension,
             type,
-            size
+            size   
         };
     }
 
@@ -91,14 +92,14 @@ class FileUpload extends EventEmitter {
 
         return new Promise((resolve, reject) => {
 
-            fs.access(this.filePath, (err) => {
+            fs.access(this.fileInfo.path, (err) => {
 
                 if (err) {
 
                     return reject(err);
                 }
 
-                fs.unlink(this.filePath, err => err ? reject(err) : resolve());
+                fs.unlink(this.fileInfo.path, err => err ? reject(err) : resolve());
             });
         });
     }
