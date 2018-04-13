@@ -215,7 +215,7 @@ class ChatSocket {
             }
 
             const { id: uploadId, data } = uploadData;
-            const fileUpload = this._activeFilesUploads.get(id);
+            const fileUpload = this._activeFilesUploads.get(uploadId);
 
             if (!fileUpload) {
 
@@ -234,7 +234,7 @@ class ChatSocket {
             } else {
 
                 socket.emit('file part uploaded', {
-                    id,
+                    uploadId,
                     uploadedBytes: fileUpload.writtenBytes
                 });
             }
