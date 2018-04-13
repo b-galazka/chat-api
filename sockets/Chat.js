@@ -136,13 +136,16 @@ class ChatSocket {
                 this._disconnectSocketsWithExpiredTokens();
         
                 const { error } = Joi.validate(message, messageSchema);
-                const { tempID, content } = message;
-
+                
                 if (error) {
 
-                    return socket.emit('message validation error', error.message);
+                    return socket.emit('message validation error', { 
+                        tempID: message && message.tempID, 
+                        message: error.message
+                    });
                 }
 
+                const { tempID, content } = message;
                 const savedMessage = await Message.create({ authorId, content });
 
                 const savedMessageFullData = await Message.findSavedMessageFullData(
@@ -152,7 +155,7 @@ class ChatSocket {
                 socket.broadcast.emit('message', savedMessageFullData);
 
                 socket.emit('message saved', {
-                    tempID: message.tempID,
+                    tempID,
                     message: savedMessageFullData
                 });
             } catch (err) {
