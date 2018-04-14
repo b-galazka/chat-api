@@ -40,6 +40,7 @@ class ImageResizer {
 
             await sharp(this._filePath)
                 .resize(width, height)
+                .withoutEnlargement()
                 .min()
                 .toFile(path);
 
