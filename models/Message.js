@@ -90,15 +90,41 @@ Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
     return messages.reverse();
 };
 
+Message.createWithAttachment = async (authorId, attachmentInfo) => {
+
+    const createdMessage = await Message.create({ authorId, content: '' });
+
+    await MessageAttachment.createWithMiniatures(
+        createdMessage.id, 
+        attachmentInfo
+    );
+
+    return Message.findSavedMessageFullData(createdMessage.id);
+};
+
 Message.findSavedMessageFullData = id => Message.findById(id, {
 
     attributes: ['id', 'content', 'date'],
 
     include: [
+
         {
             model: User,
             as: 'author',
             attributes: ['username']
+        },
+
+        {
+            model: MessageAttachment,
+            as: 'attachment',
+            attributes: [
+                'type',
+                'name',
+                'size',
+                'url',
+                'iconUrl',
+                'resizedImageUrl'
+            ]
         }
     ]
 });

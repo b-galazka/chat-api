@@ -48,6 +48,11 @@ class ImageResizer {
         })();
     }
 
+    static isProperFileType(fileType) {
+
+        return (fileType.startsWith('image/') && !fileType.endsWith('/gif'));
+    }
+
     _createRandomPath() {
 
         return path.resolve(uploadsDir, cuid() + this._extension);

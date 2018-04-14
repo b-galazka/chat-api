@@ -208,7 +208,7 @@ class ChatSocket {
 
             if (error) {
 
-                return socket.emit('uploading file part error', {
+                return socket.emit('uploading file error', {
                     uploadId: uploadData && uploadData.id,
                     message: error.message
                 });
@@ -219,7 +219,7 @@ class ChatSocket {
 
             if (!fileUpload) {
 
-                return socket.emit('uploading file part error', {
+                return socket.emit('uploading file error', {
                     uploadId,
                     message: 'invalid ID'
                 });
@@ -229,15 +229,53 @@ class ChatSocket {
 
             if (fileUpload.isFinished()) {
 
-                // todo: save records to DB
+                this._onWholeFileUploaded({ socket, uploadId, fileUpload })
 
             } else {
 
-                socket.emit('file part uploaded', {
+                this._onFilePartUploaded({ socket, uploadId, fileUpload });         
+            }
+        });
+    }
+
+    _onWholeFileUploaded({ socket, uploadId, fileUpload }) {
+
+        (async () => {
+
+            try {
+
+                this._activeFilesUploads.delete(uploadId);
+
+                const uploaderId = socket.handshake.tokenData.id;
+
+                const createdMessage = await Message.createWithAttachment(
+                    uploaderId, fileUpload.fileInfo
+                );
+
+                socket.broadcast.emit('message', createdMessage);
+
+                socket.emit('file uploaded', {
                     uploadId,
-                    uploadedBytes: fileUpload.writtenBytes
+                    message: createdMessage
+                });
+
+            } catch (err) {
+
+                console.error(err);
+
+                socket.emit('uploading file error', {
+                    uploadId,
+                    message: 'something went wrong'
                 });
             }
+        })();
+    }
+
+    _onFilePartUploaded({ socket, uploadId, fileUpload }) {
+
+        socket.emit('file part uploaded', {
+            uploadId,
+            uploadedBytes: fileUpload.writtenBytes
         });
     }
 }
