@@ -1,7 +1,7 @@
 {
   "name": "chat-api",
   "version": "1.0.0",
-  "description": "Chat API written in NodeJS using ExpressJS, SocketIO, MongoDB and JWT.",
+  "description": "Chat API written in NodeJS using ExpressJS, SocketIO, MySQL (Sequelize) and JWT.",
   "main": "index.js",
   "scripts": {
     "test": "SET NODE_ENV=test&& mocha",
