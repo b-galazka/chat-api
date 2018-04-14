@@ -9,7 +9,7 @@ const trimStrings = require('../functions/trimSequelizeModelStrings');
 const userSchema = {
 
     id: {
-        type: INTEGER,
+        type: INTEGER.UNSIGNED,
         primaryKey: true,
         autoIncrement: true
     },

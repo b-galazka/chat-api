@@ -2,12 +2,13 @@ const { TEXT, DATE, NOW, INTEGER, Op } = require('sequelize');
 
 const db = require('../db');
 const User = require('./User');
+const MessageAttachment = require('./MessageAttachment');
 const trimStrings = require('../functions/trimSequelizeModelStrings');
 
 const messageSchema = {
 
     id: {
-        type: INTEGER,
+        type: INTEGER.UNSIGNED,
         primaryKey: true,
         autoIncrement: true
     },
@@ -23,7 +24,7 @@ const messageSchema = {
     },
 
     authorId: {
-        type: INTEGER,
+        type: INTEGER.UNSIGNED,
         allowNull: false,
 
         references: {
@@ -38,6 +39,11 @@ const Message = db.define('message', messageSchema, { timestamps: false });
 Message.belongsTo(User, {
     as: 'author',
     foreignKey: 'authorId'
+});
+
+Message.hasOne(MessageAttachment, {
+    as: 'attachment',
+    foreignKey: 'messageId'
 });
 
 Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {

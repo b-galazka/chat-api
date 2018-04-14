@@ -3,6 +3,8 @@ const mysql = require('mysql2/promise');
 const { dbName, dbHost, dbPassword, dbUser } = require('../config');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const SavedFile = require('../models/SavedFile');
+const MessageAttachment = require('../models/MessageAttachment');
 const db = require('./');
 
 const createDatabaseIfNotExists = async () => {
@@ -25,28 +27,30 @@ const createDatabaseIfNotExists = async () => {
 const syncSequelizeModels = async () => {
 
     await User.sync();
+    await Message.sync();
 
-    return Promise.all([
-        Message.sync()   
+    await Promise.all([
+        MessageAttachment.sync(),
+        SavedFile.sync()
     ]);
 };
 
 (async () => {
 
-    try {
+    const { NODE_ENV } = process.env;
 
-        const { NODE_ENV } = process.env;
+    try {
 
         await createDatabaseIfNotExists();
         await syncSequelizeModels();
 
         await db.close();
 
-        console.log(`${NODE_ENV} DB synced`);
+        console.log(`${NODE_ENV || ''} DB synced`);
 
     } catch(err) {
 
-        console.error(`something went wrong during syncing ${NODE_ENV} DB`);
+        console.error(`something went wrong during syncing ${NODE_ENV || ''} DB`);
         console.error(err);
     }
 })();
