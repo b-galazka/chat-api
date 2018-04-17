@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
 const messagesRoutes = require('./routes/messages');
 const notFoundRoutes = require('./routes/notFound');
+const filesRoutes = require('./routes/files');
 
 const ChatSocket = require('./sockets/Chat');
 
@@ -35,6 +36,7 @@ app.use(catchJsonParsingError);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/messages', messagesRoutes);
+app.use(filesRoutes);
 app.use('*', notFoundRoutes);
 
 // configure socket.io
