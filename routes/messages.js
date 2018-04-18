@@ -3,24 +3,17 @@ const router = require('express').Router();
 const Message = require('../models/Message');
 const authorization = require('../middlewares/authorization');
 const validateUrlQueryString = require('../middlewares/validateUrlQueryString');
-const messagesQueryObjectSchema = require('../validationSchemas/messagesUrlQueryString');
+const paginationQueryStringSchema = require('../validationSchemas/paginationQueryString');
+const getPaginationOptions = require('../functions/getPaginationOptions');
 
 router.get('/', authorization);
-router.get('/', validateUrlQueryString(messagesQueryObjectSchema));
+router.get('/', validateUrlQueryString(paginationQueryStringSchema));
 
 router.get('/', async (req, res) => {
 
     try {
 
-        const options = Object.keys(req.query).reduce((options, key) => {
-
-            const value = req.query[key];
-
-            options[key] = +value;
-
-            return options;
-
-        }, {});
+        const options = getPaginationOptions(req.query);
 
         const messages = await Message.loadByTimeAsc(options);
 
