@@ -15,6 +15,7 @@ const usersRoutes = require('./routes/users');
 const messagesRoutes = require('./routes/messages');
 const notFoundRoutes = require('./routes/notFound');
 const filesRoutes = require('./routes/files');
+const attachmentsRoutes = require('./routes/attachments');
 
 const ChatSocket = require('./sockets/Chat');
 
@@ -36,6 +37,7 @@ app.use(catchJsonParsingError);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/messages', messagesRoutes);
+app.use('/attachments', attachmentsRoutes);
 app.use(filesRoutes);
 app.use('*', notFoundRoutes);
 
