@@ -21,16 +21,6 @@ const messageSchema = {
     content: {
         type: TEXT,
         allowNull: false
-    },
-
-    authorId: {
-        type: INTEGER.UNSIGNED,
-        allowNull: false,
-
-        references: {
-            model: User,
-            key: 'id'
-        }
     }
 };
 
@@ -46,6 +36,24 @@ Message.hasOne(MessageAttachment, {
     foreignKey: 'messageId'
 });
 
+MessageAttachment.belongsTo(Message, {
+    as: 'message',
+    foreignKey: 'messageId'
+});
+
+Message._includeOptions = [
+
+    {
+        association: 'author',
+        attributes: ['username']
+    },
+
+    {
+        association: 'attachment',
+        attributes: ['type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl']
+    }
+];
+
 Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
 
     const options = {
@@ -55,14 +63,7 @@ Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
         ],
 
         attributes: ['id', 'content', 'date'],
-
-        include: [
-            {
-                model: User,
-                as: 'author',
-                attributes: ['username']
-            }
-        ]
+        include: Message._includeOptions
     };
 
     if (skip !== undefined) {
@@ -99,34 +100,13 @@ Message.createWithAttachment = async (authorId, attachmentInfo) => {
         attachmentInfo
     );
 
-    return Message.findSavedMessageFullData(createdMessage.id);
+    return Message.findSingleMessageFullData(createdMessage.id);
 };
 
-Message.findSavedMessageFullData = id => Message.findById(id, {
+Message.findSingleMessageFullData = id => Message.findById(id, {
 
     attributes: ['id', 'content', 'date'],
-
-    include: [
-
-        {
-            model: User,
-            as: 'author',
-            attributes: ['username']
-        },
-
-        {
-            model: MessageAttachment,
-            as: 'attachment',
-            attributes: [
-                'type',
-                'name',
-                'size',
-                'url',
-                'iconUrl',
-                'resizedImageUrl'
-            ]
-        }
-    ]
+    include: Message._includeOptions
 });
 
 Message.hook('beforeValidate', trimStrings);

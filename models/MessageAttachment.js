@@ -1,8 +1,7 @@
-const { STRING, INTEGER } = require('sequelize');
+const { STRING, INTEGER, Op } = require('sequelize');
 
 const db = require('../db');
 const trimStrings = require('../functions/trimSequelizeModelStrings');
-const Message = require('./Message');
 const SavedFile = require('./SavedFile');
 const ImageResizer = require('../tools/ImageResizer');
 
@@ -40,15 +39,6 @@ const messageAttachmentSchema = {
 
     resizedImageUrl: {
         type: STRING(50)
-    },
-
-    messageId: {
-        type: INTEGER.UNSIGNED,
-
-        references: {
-            model: Message,
-            key: 'id'
-        }
     }
 };
 
@@ -100,6 +90,51 @@ MessageAttachment._createMiniatures = async (filePath) => {
         iconId: icon.id,
         resizedImageId: resizedImage.id
     };
+};
+
+MessageAttachment.loadByTimeAsc = ({ skip, limit, before } = {}) => {
+
+    const options = {
+
+        order: [
+            ['id', 'DESC']
+        ],
+
+        attributes: ['type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl'],
+
+        include: [
+
+            {
+                association: 'message',
+                attributes: ['date'],
+                include: [
+                    { association: 'author', attributes: ['username'] }
+                ]
+            }
+        ]
+    };
+
+    if (skip !== undefined) {
+
+        options.offset = skip;
+    }
+
+    if (limit !== undefined) {
+
+        options.limit = limit;
+    }
+
+    if (before !== undefined) {
+
+        options.where = {
+
+            id: {
+                [Op.lt]: before
+            }
+        };
+    }
+
+    return MessageAttachment.findAll(options);
 };
 
 MessageAttachment.hook('beforeValidate', trimStrings);
