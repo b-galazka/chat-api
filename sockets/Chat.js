@@ -148,7 +148,7 @@ class ChatSocket {
                 const { tempID, content } = message;
                 const savedMessage = await Message.create({ authorId, content });
 
-                const savedMessageFullData = await Message.findSavedMessageFullData(
+                const savedMessageFullData = await Message.findSingleMessageFullData(
                     savedMessage.id
                 );
 
