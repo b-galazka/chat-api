@@ -4,9 +4,9 @@ const { dbName, dbHost, dbPassword, dbUser } = require('../config');
 
 (async () => {
 
-    try {
+    const { NODE_ENV } = process.env;
 
-        const { NODE_ENV } = process.env;
+    try {
 
         const connection = await mysql.createConnection({
             host: dbHost,
@@ -18,11 +18,11 @@ const { dbName, dbHost, dbPassword, dbUser } = require('../config');
 
         await connection.destroy();
 
-        console.log(`${NODE_ENV} DB dropped`);
+        console.log(`${NODE_ENV || ''} DB dropped`);
 
     } catch (err) {
 
-        console.error(`something went wrong during dropping ${NODE_ENV} DB`);
+        console.error(`something went wrong during dropping ${NODE_ENV || ''} DB`);
         console.error(err);
     }
 })();
