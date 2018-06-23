@@ -4,7 +4,6 @@
   "description": "Chat API written in NodeJS using ExpressJS, SocketIO, MySQL (Sequelize) and JWT.",
   "main": "index.js",
   "scripts": {
-    "test": "SET NODE_ENV=test&& mocha",
     "start": "SET NODE_ENV=production&& node index.js",
     "start-dev": "SET NODE_ENV=development&& nodemon index.js"
   },
