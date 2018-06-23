@@ -127,7 +127,7 @@ class ChatSocket {
 
     _setOnMessageHandler(socket) {
 
-        const { username, id: authorId } = socket.handshake.tokenData;
+        const authorId = socket.handshake.tokenData.id;
 
         socket.on('message', async (message) => {
 
