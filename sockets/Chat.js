@@ -30,6 +30,8 @@ class ChatSocket {
             this._setOnMessageHandler(socket);
             this._setOnStartFileUploadHandler(socket);
             this._setOnUploadFilePartHandler(socket);
+            this._setOnTypingStartedHandler(socket);
+            this._setOnTypingFinishedHandler(socket);
         });
 
         return this;
@@ -276,6 +278,26 @@ class ChatSocket {
         socket.emit('file part uploaded', {
             uploadId,
             uploadedBytes: fileUpload.writtenBytes
+        });
+    }
+
+    _setOnTypingStartedHandler(socket) {
+
+        socket.on('typing started', () => {
+
+            const { username } = socket.handshake.tokenData;
+
+            socket.broadcast.emit('typing started', username);
+        });
+    }
+
+    _setOnTypingFinishedHandler(socket) {
+
+        socket.on('typing finished', () => {
+
+            const { username } = socket.handshake.tokenData;
+
+            socket.broadcast.emit('typing finished', username);
         });
     }
 }
