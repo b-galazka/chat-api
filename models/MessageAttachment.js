@@ -100,7 +100,7 @@ MessageAttachment.loadByTimeAsc = ({ skip, limit, before } = {}) => {
             ['id', 'DESC']
         ],
 
-        attributes: ['type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl'],
+        attributes: ['id', 'type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl'],
 
         include: [
 
