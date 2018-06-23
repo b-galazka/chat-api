@@ -140,7 +140,7 @@ class ChatSocket {
                 if (error) {
 
                     return socket.emit('message validation error', { 
-                        tempID: message && message.tempID, 
+                        tempID: message ? message.tempID : undefined, 
                         message: error.message
                     });
                 }
@@ -176,7 +176,7 @@ class ChatSocket {
             if (error) {
 
                 return socket.emit('file info validation error', {
-                    tempId: uploadInfo && uploadInfo.tempId,
+                    tempId: uploadInfo ? uploadInfo.tempId : undefined,
                     message: error.message
                 });
             }
@@ -209,7 +209,7 @@ class ChatSocket {
             if (error) {
 
                 return socket.emit('uploading file error', {
-                    uploadId: uploadData && uploadData.id,
+                    uploadId: uploadData ? uploadData.id : undefined,
                     message: error.message
                 });
             }
