@@ -15,7 +15,6 @@ const {
     DB_USER,
     DB_PASS,
     DB_HOST,
-    DOMAIN,
     UPLOADS_DIR,
     MAX_UPLOADED_FILE_SIZE,
     FILE_UPLOAD_TIMEOUT,
