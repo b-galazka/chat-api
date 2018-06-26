@@ -2,7 +2,7 @@ module.exports = (instance) => {
 
     const { dataValues } = instance;
 
-    for (const key of Object.keys(dataValues)) {
+    Object.keys(dataValues).forEach((key) => {
 
         const value = dataValues[key];
 
@@ -10,5 +10,5 @@ module.exports = (instance) => {
 
             dataValues[key] = value.trim();
         }
-    }
+    });
 };
