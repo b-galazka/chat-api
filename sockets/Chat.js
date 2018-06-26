@@ -142,12 +142,12 @@ class ChatSocket {
                 if (error) {
 
                     return socket.emit('message validation error', { 
-                        tempID: message ? message.tempID : undefined, 
+                        tempId: message ? message.tempId : undefined, 
                         message: error.message
                     });
                 }
 
-                const { tempID, content } = message;
+                const { tempId, content } = message;
                 const savedMessage = await Message.create({ authorId, content });
 
                 const savedMessageFullData = await Message.findSingleMessageFullData(
@@ -157,14 +157,14 @@ class ChatSocket {
                 socket.broadcast.emit('message', savedMessageFullData);
 
                 socket.emit('message saved', {
-                    tempID,
+                    tempId,
                     message: savedMessageFullData
                 });
             } catch (err) {
 
                 console.error(err);
 
-                socket.emit('message sending error', { tempID: message.tempID });
+                socket.emit('message sending error', { tempId: message.tempId });
             }
         });
     }
