@@ -11,7 +11,7 @@ module.exports = Joi.object().keys({
         name: Joi.string().max(255),
 
         size: Joi.number()
-            .label('max file size')
+            .label('file size')
             .min(1)
             .max(maxUploadedFileSize),
 

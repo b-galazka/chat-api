@@ -19,7 +19,8 @@ const {
     MAX_UPLOADED_FILE_SIZE,
     FILE_UPLOAD_TIMEOUT,
     IMAGES_ICONS_DIMENSIONS,
-    RESIZED_IMAGES_DIMENSIONS
+    RESIZED_IMAGES_DIMENSIONS,
+    MAX_FILE_PART_SIZE
 } = process.env;
 
 let imagesIconsDimensions;
@@ -78,6 +79,7 @@ module.exports = {
 
     uploadsDir: path.resolve(UPLOADS_DIR || './uploaded_files'),
     maxUploadedFileSize: +MAX_UPLOADED_FILE_SIZE || 10485760,
+    maxFilePartSize: +MAX_FILE_PART_SIZE || 1048576,
     fileUploadTimeout: +FILE_UPLOAD_TIMEOUT || 60000,
 
     imagesIconsDimensions,
