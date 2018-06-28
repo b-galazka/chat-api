@@ -15,7 +15,9 @@ module.exports = Joi.object().keys({
             .min(1)
             .max(maxUploadedFileSize),
 
-        type: Joi.string().max(255)
+        type: Joi.string()
+            .max(255)
+            .allow('')
 
     }).requiredKeys('name', 'size', 'type')
         
