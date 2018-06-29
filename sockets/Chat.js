@@ -229,13 +229,11 @@ class ChatSocket {
 
             await fileUpload.writeFile(data);
 
+            this._onFilePartUploaded({ socket, uploadId, fileUpload });
+
             if (fileUpload.isFinished()) {
 
-                this._onWholeFileUploaded({ socket, uploadId, fileUpload })
-
-            } else {
-
-                this._onFilePartUploaded({ socket, uploadId, fileUpload });         
+                this._onWholeFileUploaded({ socket, uploadId, fileUpload });
             }
         });
     }
