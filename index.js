@@ -51,19 +51,10 @@ const io = socketIO(server, {
 io.use(socketAuthorization);
 
 // start socket
-const chatSocket = new ChatSocket(io).init();
+new ChatSocket(io).init();
 
 // listen for requests
 server.listen(port, ip, () => {
 
-    if (process.env.NODE_ENV !== 'test') {
-
-        console.log(`app is listening for requests at ${ip}:${port}`);
-    }
+    console.log(`app is listening for requests at ${ip}:${port}`);
 });
-
-// export for tests
-module.exports = {
-    app,
-    chatSocket
-};
