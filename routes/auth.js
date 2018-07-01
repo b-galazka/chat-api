@@ -12,7 +12,15 @@ router.post('/', async (req, res) => {
 
         const { username, password } = req.body;
 
-        const token = await User.generateToken({ username, password });
+        const user = await User.findByCredentials({ username, password });
+
+        const token = await User.generateToken({
+            username: user.username,
+            id: user.id
+        });
+
+        res.cookie('username', user.username);
+        res.cookie('token', token, { httpOnly: true });
 
         res.send({ token });
 
@@ -31,6 +39,14 @@ router.post('/', async (req, res) => {
             message: 'something went wrong'
         });
     }
+});
+
+router.get('/logout', (req, res) => {
+
+    res.clearCookie('username');
+    res.clearCookie('token');
+
+    res.send({ message: 'logged out' });
 });
 
 module.exports = router;

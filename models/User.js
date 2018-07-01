@@ -49,7 +49,7 @@ User.verifyToken = token => new Promise((resolve, reject) => {
     });
 });
 
-User.generateToken = async (credentials) => {
+User.findByCredentials = async (credentials) => {
 
     const user = await User.findOne({ where: credentials });
 
@@ -58,12 +58,10 @@ User.generateToken = async (credentials) => {
         throw new Error('invalid credentials');
     }
 
-    const { username, id } = user;
-
-    return User._getToken({ username, id });
+    return user;
 };
 
-User._getToken = data => new Promise((resolve, reject) => {
+User.generateToken = data => new Promise((resolve, reject) => {
 
     jwt.sign(data, jwtSecret, { expiresIn: jwtTtl }, (err, token) => {
 

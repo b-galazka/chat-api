@@ -1,10 +1,13 @@
 const { TokenExpiredError } = require('jsonwebtoken');
+const cookie = require('cookie');
 
 const User = require('../models/User');
 
 module.exports = async (socket, next) => {
 
-    const { token } = socket.handshake.query;
+    const { headers, query } = socket.handshake;
+    const cookies = cookie.parse(String(headers.cookie));
+    const token = query.token || cookies.token;
 
     try {
 
