@@ -1,20 +1,15 @@
-const { TokenExpiredError } = require('jsonwebtoken');
-const cookie = require('cookie');
+const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
 const User = require('../models/User');
+const getToken = require('../functions/getToken');
 
 module.exports = async (socket, next) => {
 
-    const { headers, query } = socket.handshake;
-    const cookies = cookie.parse(String(headers.cookie));
-    const token = query.token || cookies.token;
-
     try {
 
-        if (token === undefined) {
-
-            return next(new Error('no token provided'));
-        }
+        const { cookie, authorization } = socket.handshake.headers;
+        console.log(authorization);
+        const token = getToken(authorization, cookie);
 
         socket.handshake.tokenData = await User.verifyToken(token);
 
@@ -24,10 +19,13 @@ module.exports = async (socket, next) => {
 
         console.error(err);
 
-        const tokenStatus = (
-            (err instanceof TokenExpiredError) ? 'expired' : 'invalid'
-        );
+        if (err instanceof JsonWebTokenError) {
 
-        next(new Error(`${tokenStatus} token provided`));
+            const tokenStatus = (err instanceof TokenExpiredError) ? 'expired' : 'invalid';
+
+            return next(new Error(`${tokenStatus} token provided`));
+        }
+
+        next(err);
     }
 };

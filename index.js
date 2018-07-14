@@ -18,6 +18,7 @@ const filesRoutes = require('./routes/files');
 const attachmentsRoutes = require('./routes/attachments');
 
 const ChatSocket = require('./sockets/Chat');
+const handleSocketPreflightRequest = require('./functions/handleSocketPreflightRequest');
 
 // configuration constants
 const { port, ip } = require('./config');
@@ -45,7 +46,8 @@ app.use('*', notFoundRoutes);
 const server = http.Server(app);
 const io = socketIO(server, {
     pingInterval: 10000, 
-    pingTimeout: 5000
+    pingTimeout: 5000,
+    handlePreflightRequest: handleSocketPreflightRequest
 });
 
 io.use(socketAuthorization);
