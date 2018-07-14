@@ -1,58 +1,17 @@
-const { TokenExpiredError } = require('jsonwebtoken');
-const cookie = require('cookie');
+const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
 const User = require('../models/User');
-
-const validateAuthHeader = (authHeader) => {
-
-    const regex = /^Bearer ([a-z0-9_-]+)\.([a-z0-9_-]+)\.([a-z0-9_-]+)$/i;
-
-    if (!regex.test(authHeader)) {
-
-        return 'invalid authorization header provided';
-    }
-}
-
-const validateCookiesHeader = (cookiesHeader) => {
-
-    if (!cookiesHeader) {
-        
-        return 'no cookies nor authorization header provided';
-    }
-
-    const regex = /token=([a-z0-9_-]+)\.([a-z0-9_-]+)\.([a-z0-9_-]+)/i;
-
-    if (!regex.test(cookiesHeader)) {
-
-        return 'invalid cookies header provided';
-    }
-};
+const getToken = require('../functions/getToken');
 
 module.exports = async (req, res, next) => {
-
-    const authHeader = req.header('Authorization');
-    const cookiesHeader = req.header('Cookie');
-
-    const headerValidationError = (
-        (authHeader === undefined) ?
-            validateCookiesHeader(cookiesHeader) :
-            validateAuthHeader(authHeader)    
-    );
-
-    if (headerValidationError) {
-
-        return res.status(403).send({
-            message: headerValidationError
-        });
-    }
-
-    const token = (
-        (authHeader === undefined) ?
-            cookie.parse(cookiesHeader).token :
-            authHeader.split(' ')[1]
-    );
-
+    
     try {
+
+        const authHeader = req.header('Authorization');
+        const cookiesHeader = req.header('Cookie');
+        const token = getToken(authHeader, cookiesHeader);
+
+        console.log(cookiesHeader);
 
         await User.verifyToken(token);
 
@@ -62,10 +21,15 @@ module.exports = async (req, res, next) => {
 
         console.error(err);
 
-        const tokenStatus = (err instanceof TokenExpiredError) ? 'expired' : 'invalid';
+        if (err instanceof JsonWebTokenError) {
 
-        return res.status(401).send({
-            message: `${tokenStatus} token`
-        });
+            const tokenStatus = (err instanceof TokenExpiredError) ? 'expired' : 'invalid';
+
+            return res.status(401).send({ message: `${tokenStatus} token` });
+        }
+
+        const { message } = err;
+
+        return res.status(403).send({ message });
     }
 };
