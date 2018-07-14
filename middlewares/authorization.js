@@ -11,8 +11,6 @@ module.exports = async (req, res, next) => {
         const cookiesHeader = req.header('Cookie');
         const token = getToken(authHeader, cookiesHeader);
 
-        console.log(cookiesHeader);
-
         await User.verifyToken(token);
 
         next();
