@@ -69,19 +69,19 @@ MessageAttachment._createImagePreviews = async (filePath) => {
 
     const imagesResizer = new ImageResizer(filePath);
 
-    const [iconPath, resizedImagePath] = await Promise.all([
+    const [iconPath, previewPath] = await Promise.all([
         imagesResizer.createIcon(),
-        imagesResizer.createResizedImage()
+        imagesResizer.createPreview()
     ]);
 
-    const [icon, resizedImage] = await Promise.all([
+    const [icon, preview] = await Promise.all([
         SavedFile.create({ path: iconPath }),
-        SavedFile.create({ path: resizedImagePath })
+        SavedFile.create({ path: previewPath })
     ]);
 
     return {
         icon: icon.id,
-        resizedImage: resizedImage.id
+        preview: preview.id
     };
 };
 

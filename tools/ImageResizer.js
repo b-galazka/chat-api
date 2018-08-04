@@ -4,8 +4,8 @@ const sharp = require('sharp');
 
 const {
     uploadsDir,
-    resizedImagesDimensions,
-    imagesIconsDimensions
+    previewsDimensions,
+    iconsDimensions
 } = require('../config');
 
 class ImageResizer {
@@ -21,7 +21,7 @@ class ImageResizer {
         return (async () => {
 
             const path = this._createRandomPath();
-            const { width, height } = imagesIconsDimensions;
+            const { width, height } = iconsDimensions;
 
             await sharp(this._filePath)
                 .resize(width, height)
@@ -31,12 +31,12 @@ class ImageResizer {
         })();
     }
 
-    createResizedImage() {
+    createPreview() {
 
         return (async () => {
 
             const path = this._createRandomPath();
-            const { width, height } = resizedImagesDimensions;
+            const { width, height } = previewsDimensions;
 
             await sharp(this._filePath)
                 .resize(width, height)

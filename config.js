@@ -18,43 +18,43 @@ const {
     UPLOADS_DIR,
     MAX_UPLOADED_FILE_SIZE,
     FILE_UPLOAD_TIMEOUT,
-    IMAGES_ICONS_DIMENSIONS,
-    RESIZED_IMAGES_DIMENSIONS,
+    ICONS_DIMENSIONS,
+    PREVIEWS_DIMENSIONS,
     MAX_FILE_PART_SIZE
 } = process.env;
 
-let imagesIconsDimensions;
-let resizedImagesDimensions;
+let iconsDimensions;
+let previewsDimensions;
 
-if (IMAGES_ICONS_DIMENSIONS) {
+if (ICONS_DIMENSIONS) {
 
-    const [width, height] = IMAGES_ICONS_DIMENSIONS.split(',');
+    const [width, height] = ICONS_DIMENSIONS.split(',');
 
-    imagesIconsDimensions = {
+    iconsDimensions = {
         width: +width,
         height: +height
     };
 
 } else {
 
-    imagesIconsDimensions = {
+    iconsDimensions = {
         width: 200,
         height: 200
     };
 }
 
-if (RESIZED_IMAGES_DIMENSIONS) {
+if (PREVIEWS_DIMENSIONS) {
 
-    const [width, height] = RESIZED_IMAGES_DIMENSIONS.split(',');
+    const [width, height] = PREVIEWS_DIMENSIONS.split(',');
 
-    resizedImagesDimensions = {
+    previewsDimensions = {
         width: +width,
         height: +height
     };
 
 } else {
 
-    resizedImagesDimensions = {
+    previewsDimensions = {
         width: 600,
         height: 600
     };
@@ -82,6 +82,6 @@ module.exports = {
     maxFilePartSize: +MAX_FILE_PART_SIZE || 1048576,
     fileUploadTimeout: +FILE_UPLOAD_TIMEOUT || 60000,
 
-    imagesIconsDimensions,
-    resizedImagesDimensions
+    iconsDimensions,
+    previewsDimensions
 };
