@@ -50,7 +50,7 @@ Message._includeOptions = [
 
     {
         association: 'attachment',
-        attributes: ['type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl']
+        attributes: ['type', 'name', 'size', 'urls']
     }
 ];
 
@@ -95,8 +95,8 @@ Message.createWithAttachment = async (authorId, attachmentInfo) => {
 
     const createdMessage = await Message.create({ authorId, content: '' });
 
-    await MessageAttachment.createWithMiniatures(
-        createdMessage.id, 
+    await MessageAttachment.createWithPreview(
+        createdMessage.id,
         attachmentInfo
     );
 

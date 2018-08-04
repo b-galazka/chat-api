@@ -1,4 +1,4 @@
-const { STRING, INTEGER, Op } = require('sequelize');
+const { STRING, INTEGER, JSON: JsonDataType, Op } = require('sequelize');
 
 const db = require('../db');
 const trimStrings = require('../functions/trimSequelizeModelStrings');
@@ -27,52 +27,45 @@ const messageAttachmentSchema = {
         type: INTEGER.UNSIGNED,
         allowNull: false
     },
-    
-    url: {
-        type: STRING(50),
+
+    urls: {
+        type: JsonDataType,
         allowNull: false
-    },
-
-    iconUrl: {
-        type: STRING(50)
-    },
-
-    resizedImageUrl: {
-        type: STRING(50)
     }
 };
 
 const MessageAttachment = db.define(
-    'messageAttachment', 
+    'messageAttachment',
     messageAttachmentSchema,
     { timestamps: false }
 );
 
-MessageAttachment.createWithMiniatures = async (messageId, fileInfo) => {
+MessageAttachment.createWithPreview = async (messageId, fileInfo) => {
 
     const savedFile = await SavedFile.create({ path: fileInfo.path });
+    const filesIds = { originalFile: savedFile.id };
 
-    let miniaturesIds = {};
+    let previewsIds = {};
 
     if (ImageResizer.isProperFileType(fileInfo.type)) {
 
-        miniaturesIds = await MessageAttachment._createMiniatures(fileInfo.path);
+        previewsIds = await MessageAttachment._createImagePreviews(fileInfo.path);
     }
 
-    const { iconId, resizedImageId } = miniaturesIds;
+    // TODO: generate video preview
+
+    Object.assign(filesIds, previewsIds);
 
     return MessageAttachment.create({
         type: fileInfo.type,
         name: fileInfo.name + fileInfo.extension,
         size: fileInfo.size,
-        url: '/get-file/' + savedFile.id,
-        iconUrl: iconId && '/get-file/' + iconId,
-        resizedImageUrl: resizedImageId && '/get-file/' + resizedImageId,
+        urls: MessageAttachment._getFilesUrls(filesIds),
         messageId
     });
 };
 
-MessageAttachment._createMiniatures = async (filePath) => {
+MessageAttachment._createImagePreviews = async (filePath) => {
 
     const imagesResizer = new ImageResizer(filePath);
 
@@ -87,10 +80,20 @@ MessageAttachment._createMiniatures = async (filePath) => {
     ]);
 
     return {
-        iconId: icon.id,
-        resizedImageId: resizedImage.id
+        icon: icon.id,
+        resizedImage: resizedImage.id
     };
 };
+
+MessageAttachment._getFilesUrls = (filesIds) => Object.keys(filesIds).reduce((urls, fileType) => {
+
+    const fileId = filesIds[fileType];
+
+    urls[fileType] = '/get-file/' + fileId;
+
+    return urls;
+
+}, {});
 
 MessageAttachment.loadByTimeAsc = ({ skip, limit, before } = {}) => {
 
