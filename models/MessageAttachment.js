@@ -52,8 +52,6 @@ MessageAttachment.createWithPreview = async (messageId, fileInfo) => {
         previewsIds = await MessageAttachment._createImagePreviews(fileInfo.path);
     }
 
-    // TODO: generate video preview
-
     Object.assign(filesIds, previewsIds);
 
     return MessageAttachment.create({
