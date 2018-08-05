@@ -12,6 +12,12 @@ DB_HOST="127.0.0.1"
 DB_USER="root"  
 DB_PASS=""  
 DB_NAME="chat"  
+UPLOADS_DIR='./uploads'  
+MAX_UPLOADED_FILE_SIZE=10485760  
+FILE_UPLOAD_TIMEOUT=60000  
+ICONS_DIMENSIONS=200,200  
+PREVIEWS_DIMENSIONS=600,600  
+MAX_FILE_PART_SIZE=1048576  
 3. Run db/sync.js script to create database.
 4. Run "npm start" or "npm run start-dev".
 
