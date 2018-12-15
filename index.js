@@ -55,5 +55,4 @@ server.listen(port, ip, () => {
     logger.log(`app is listening for requests at ${ip}:${port}`);
 });
 
-// TODO: move controllers to external files
 // TODO: improve errors handling

@@ -1,11 +1,8 @@
 const router = require('express').Router();
 
-// TODO: add invalid HTTP method handler
-router.all('*', (req, res) => {
+const controllers = require('../controllers/notFound');
 
-    res.status(404).send({
-        message: 'not found'
-    });
-});
+// TODO: add invalid HTTP method handler
+router.all('*', controllers.notFound);
 
 module.exports = router;
