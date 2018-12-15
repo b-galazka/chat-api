@@ -7,6 +7,7 @@ module.exports = async (req, res, next) => {
 
     try {
 
+        // TODO: move to User.checkUsernameAvailability?
         const user = await User.findOne({
             where: { username }
         });

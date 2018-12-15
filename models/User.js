@@ -93,6 +93,7 @@ User.hook('beforeCreate', (instance) => {
     }
 });
 
+// TODO: move to User.findByCredentials?
 User.hook('beforeFind', (options) => {
 
     const { where } = options;

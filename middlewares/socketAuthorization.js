@@ -30,3 +30,5 @@ module.exports = async (socket, next) => {
         next(err);
     }
 };
+
+// TODO: move to sockets/utils/

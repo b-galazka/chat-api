@@ -56,6 +56,7 @@ Message._includeOptions = [
 
 Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
 
+    // TODO: replace ifs with ternaries
     const options = {
 
         order: [

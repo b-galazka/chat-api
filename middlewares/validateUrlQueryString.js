@@ -6,8 +6,12 @@ module.exports = urlQueryObjectSchema => (req, res, next) => {
 
     if (error) {
 
-        return res.status(400).send({ message: error.message });
+        const { message } = error;
+
+        return res.status(400).send({ message });
     }
 
     next();
 };
+
+// TODO: create validateRequest(schema, body/query)

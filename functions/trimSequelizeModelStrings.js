@@ -12,3 +12,5 @@ module.exports = (instance) => {
         }
     });
 };
+
+// TODO: move to models/utils

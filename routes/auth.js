@@ -20,6 +20,7 @@ router.post('/', async (req, res) => {
             id: user.id
         });
 
+        // TODO: add GET users/me instead of setting username cookie
         res.cookie('username', user.username);
         res.cookie('token', token, { httpOnly: true });
 

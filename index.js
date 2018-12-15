@@ -52,6 +52,7 @@ app.use(filesRoutes);
 app.use('*', notFoundRoutes);
 
 // configure socket.io
+// TODO: move to sockets/Connection external class
 const server = http.Server(app);
 const io = socketIO(server, {
     pingInterval: 10000,
@@ -69,3 +70,7 @@ server.listen(port, ip, () => {
 
     logger.log(`app is listening for requests at ${ip}:${port}`);
 });
+
+// TODO: move controllers to external files
+// TODO: add routes/index.js
+// TODO: improve errors handling

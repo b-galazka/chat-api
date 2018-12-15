@@ -23,3 +23,5 @@ module.exports = (req, res) => {
 
     res.end();
 };
+
+// TODO: move to controllers
