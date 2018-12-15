@@ -3,6 +3,7 @@ const router = require('express').Router();
 const User = require('../models/User');
 const authCredentialsSchema = require('../validationSchemas/authCredentials');
 const validateRequestBody = require('../middlewares/validateRequestBody');
+const logger = require('../utils/logger');
 
 router.post('/', validateRequestBody(authCredentialsSchema));
 
@@ -26,7 +27,7 @@ router.post('/', async (req, res) => {
 
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         if (err.message === 'invalid credentials') {
 

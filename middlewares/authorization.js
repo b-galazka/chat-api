@@ -2,9 +2,10 @@ const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
 const User = require('../models/User');
 const getToken = require('../functions/getToken');
+const logger = require('../utils/logger');
 
 module.exports = async (req, res, next) => {
-    
+
     try {
 
         const authHeader = req.header('Authorization');
@@ -17,7 +18,7 @@ module.exports = async (req, res, next) => {
 
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         if (err instanceof JsonWebTokenError) {
 

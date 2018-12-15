@@ -42,7 +42,7 @@ User.verifyToken = token => new Promise((resolve, reject) => {
 
         if (err) {
 
-            return reject(err)
+            return reject(err);
         }
 
         resolve(data);

@@ -3,9 +3,13 @@ const router = require('express').Router();
 const User = require('../models/User');
 const checkUsernameAvailability = require('../middlewares/checkUsernameAvailability');
 const authorization = require('../middlewares/authorization');
-const usernameAvailabilityRequestSchema = require('../validationSchemas/usernameAvailabilityRequest');
 const userSchema = require('../validationSchemas/user');
 const validateRequestBody = require('../middlewares/validateRequestBody');
+const logger = require('../utils/logger');
+
+const usernameAvailabilityRequestSchema = require(
+    '../validationSchemas/usernameAvailabilityRequest'
+);
 
 router.post('/', validateRequestBody(userSchema));
 router.post('/', checkUsernameAvailability);
@@ -21,7 +25,7 @@ router.get('/', async (req, res) => {
         res.send(users);
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         res.status(500).send({
             message: 'something went wrong'
@@ -43,7 +47,7 @@ router.post('/', async (req, res) => {
         });
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         res.status(500).send({
             message: 'something went wrong'
@@ -59,18 +63,18 @@ router.post('/username-availability', async (req, res) => {
 
         const user = await User.findOne({
 
-            where: { 
+            where: {
                 username: username.trim()
             }
         });
 
         res.send({
             username,
-            free: (user) ? false : true
+            free: !user
         });
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         res.status(500).send({
             message: 'something went wrong'

@@ -20,5 +20,5 @@ module.exports = Joi.object().keys({
             .allow('')
 
     }).requiredKeys('name', 'size', 'type')
-        
+
 }).requiredKeys('fileInfo');

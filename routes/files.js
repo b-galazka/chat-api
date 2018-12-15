@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 const authorization = require('../middlewares/authorization');
 const SavedFile = require('../models/SavedFile');
+const logger = require('../utils/logger');
 
 router.get('/get-file/:id', authorization);
 
@@ -11,9 +12,9 @@ router.get('/get-file/:id', async (req, res) => {
 
         if (err) {
 
-            console.error(err);
+            logger.error(err);
 
-            res.status(500).send({ message: 'something went wrong' });    
+            res.status(500).send({ message: 'something went wrong' });
         }
     };
 
@@ -23,7 +24,7 @@ router.get('/get-file/:id', async (req, res) => {
         const { action, name } = req.query;
 
         const file = await SavedFile.findById(~~id);
-        
+
         if (!file) {
 
             return res.status(404).send({ message: 'not found' });

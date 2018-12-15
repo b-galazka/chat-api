@@ -8,6 +8,7 @@ const socketAuthorization = require('./middlewares/socketAuthorization');
 const setCorsHeaders = require('./middlewares/setCorsHeaders');
 const catchCorsError = require('./middlewares/catchCorsError');
 
+
 // routes
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users');
@@ -18,6 +19,7 @@ const attachmentsRoutes = require('./routes/attachments');
 
 const ChatSocket = require('./sockets/Chat');
 const handleSocketPreflightRequest = require('./functions/handleSocketPreflightRequest');
+const logger = require('./utils/logger');
 
 // configuration constants
 const { port, ip } = require('./config');
@@ -57,5 +59,5 @@ new ChatSocket(io).init();
 // listen for requests
 server.listen(port, ip, () => {
 
-    console.log(`app is listening for requests at ${ip}:${port}`);
+    logger.log(`app is listening for requests at ${ip}:${port}`);
 });

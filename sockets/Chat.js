@@ -6,6 +6,7 @@ const messageSchema = require('../validationSchemas/message');
 const uploadInfoSchema = require('../validationSchemas/uploadInfo');
 const uploadFilePartDataSchema = require('../validationSchemas/uploadFilePartData');
 const FileUpload = require('../tools/FileUpload');
+const logger = require('../utils/logger');
 
 class ChatSocket {
 
@@ -30,8 +31,9 @@ class ChatSocket {
             this._setOnMessageHandler(socket);
             this._setOnStartFileUploadHandler(socket);
             this._setOnUploadFilePartHandler(socket);
-            this._setOnTypingStartedHandler(socket);
-            this._setOnTypingFinishedHandler(socket);
+
+            ChatSocket._setOnTypingFinishedHandler(socket);
+            ChatSocket._setOnTypingStartedHandler(socket);
         });
 
         return this;
@@ -58,7 +60,7 @@ class ChatSocket {
                 this._io.emit('users', usersList);
             } catch (err) {
 
-                console.error(err);
+                logger.error(err);
 
                 this._io.emit('users error');
             }
@@ -136,13 +138,13 @@ class ChatSocket {
             try {
 
                 this._disconnectSocketsWithExpiredTokens();
-        
+
                 const { error } = Joi.validate(message, messageSchema);
-                
+
                 if (error) {
 
-                    return socket.emit('message validation error', { 
-                        tempId: message ? message.tempId : undefined, 
+                    return socket.emit('message validation error', {
+                        tempId: message ? message.tempId : undefined,
                         message: error.message
                     });
                 }
@@ -156,13 +158,11 @@ class ChatSocket {
 
                 socket.broadcast.emit('message', savedMessageFullData);
 
-                socket.emit('message saved', {
-                    tempId,
-                    message: savedMessageFullData
-                });
+                socket.emit('message saved', { tempId, message: savedMessageFullData });
+
             } catch (err) {
 
-                console.error(err);
+                logger.error(err);
 
                 socket.emit('message sending error', { tempId: message.tempId });
             }
@@ -229,7 +229,7 @@ class ChatSocket {
 
             await fileUpload.writeFile(data);
 
-            this._onFilePartUploaded({ socket, uploadId, fileUpload });
+            ChatSocket._onFilePartUploaded({ socket, uploadId, fileUpload });
 
             if (fileUpload.isFinished()) {
 
@@ -261,7 +261,7 @@ class ChatSocket {
 
             } catch (err) {
 
-                console.error(err);
+                logger.error(err);
 
                 socket.emit('uploading file error', {
                     uploadId,
@@ -271,7 +271,7 @@ class ChatSocket {
         })();
     }
 
-    _onFilePartUploaded({ socket, uploadId, fileUpload }) {
+    static _onFilePartUploaded({ socket, uploadId, fileUpload }) {
 
         socket.emit('file part uploaded', {
             uploadId,
@@ -279,7 +279,7 @@ class ChatSocket {
         });
     }
 
-    _setOnTypingStartedHandler(socket) {
+    static _setOnTypingStartedHandler(socket) {
 
         socket.on('typing started', () => {
 
@@ -289,7 +289,7 @@ class ChatSocket {
         });
     }
 
-    _setOnTypingFinishedHandler(socket) {
+    static _setOnTypingFinishedHandler(socket) {
 
         socket.on('typing finished', () => {
 

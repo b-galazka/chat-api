@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { fileUploadTimeout, uploadsDir } = require('../config');
+const logger = require('../utils/logger');
 
 class FileUpload extends EventEmitter {
 
@@ -27,7 +28,7 @@ class FileUpload extends EventEmitter {
 
     writeFile(data) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             const writeStream = this._writeStream;
 
@@ -59,7 +60,7 @@ class FileUpload extends EventEmitter {
             name: name.slice(0, lastDotPosition),
             extension,
             type,
-            size   
+            size
         };
     }
 
@@ -75,7 +76,7 @@ class FileUpload extends EventEmitter {
 
             } catch (err) {
 
-                console.error(err);
+                logger.error(err);
             }
 
         }, fileUploadTimeout);

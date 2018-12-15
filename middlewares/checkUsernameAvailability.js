@@ -1,11 +1,10 @@
-const Joi = require('joi');
-
 const User = require('../models/User');
+const logger = require('../utils/logger');
 
 module.exports = async (req, res, next) => {
 
     const { username } = req.body;
-    
+
     try {
 
         const user = await User.findOne({
@@ -23,7 +22,7 @@ module.exports = async (req, res, next) => {
 
     } catch (err) {
 
-        console.error(err);
+        logger.error(err);
 
         return res.status(500).send({
             message: 'something went wrong'

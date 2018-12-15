@@ -6,6 +6,7 @@ const User = require('../models/User');
 const SavedFile = require('../models/SavedFile');
 const MessageAttachment = require('../models/MessageAttachment');
 const db = require('./');
+const logger = require('../utils/logger');
 
 const createDatabaseIfNotExists = async () => {
 
@@ -46,11 +47,11 @@ const syncSequelizeModels = async () => {
 
         await db.close();
 
-        console.log(`${NODE_ENV || ''} DB synced`);
+        logger.log(`${NODE_ENV || ''} DB synced`);
 
     } catch(err) {
 
-        console.error(`something went wrong during syncing ${NODE_ENV || ''} DB`);
-        console.error(err);
+        logger.error(`something went wrong during syncing ${NODE_ENV || ''} DB`);
+        logger.error(err);
     }
 })();

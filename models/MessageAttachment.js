@@ -83,7 +83,7 @@ MessageAttachment._createImagePreviews = async (filePath) => {
     };
 };
 
-MessageAttachment._getFilesUrls = (filesIds) => Object.keys(filesIds).reduce((urls, fileType) => {
+MessageAttachment._getFilesUrls = filesIds => Object.keys(filesIds).reduce((urls, fileType) => {
 
     const fileId = filesIds[fileType];
 
@@ -93,9 +93,9 @@ MessageAttachment._getFilesUrls = (filesIds) => Object.keys(filesIds).reduce((ur
 
 }, {});
 
-MessageAttachment.loadByTimeAsc = ({ skip, limit, before } = {}) => {
+MessageAttachment.loadByTimeDesc = ({ skip, limit, before } = {}) => {
 
-    const options = {
+    return MessageAttachment.findAll({
 
         order: [
             ['id', 'DESC']
@@ -108,34 +108,14 @@ MessageAttachment.loadByTimeAsc = ({ skip, limit, before } = {}) => {
             {
                 association: 'message',
                 attributes: ['date'],
-                include: [
-                    { association: 'author', attributes: ['username'] }
-                ]
+                include: [{ association: 'author', attributes: ['username'] }]
             }
-        ]
-    };
+        ],
 
-    if (skip !== undefined) {
-
-        options.offset = skip;
-    }
-
-    if (limit !== undefined) {
-
-        options.limit = limit;
-    }
-
-    if (before !== undefined) {
-
-        options.where = {
-
-            id: {
-                [Op.lt]: before
-            }
-        };
-    }
-
-    return MessageAttachment.findAll(options);
+        offset: (skip !== undefined) ? skip : undefined,
+        limit: (limit !== undefined) ? limit : undefined,
+        where: (before !== undefined) ? { id: { [Op.lt]: before } } : undefined
+    });
 };
 
 MessageAttachment.hook('beforeValidate', trimStrings);
