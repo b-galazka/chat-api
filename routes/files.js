@@ -4,9 +4,9 @@ const authorization = require('../middlewares/authorization');
 const SavedFile = require('../models/SavedFile');
 const logger = require('../utils/logger');
 
-router.get('/get-file/:id', authorization);
+router.get('/:id', authorization);
 
-router.get('/get-file/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
 
     const onErrorHandler = (err) => {
 

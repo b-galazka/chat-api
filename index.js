@@ -11,19 +11,11 @@ const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
 
-// middlewares
 const catchJsonParsingError = require('./middlewares/catchJsonParsingError');
 const socketAuthorization = require('./middlewares/socketAuthorization');
 const setCorsHeaders = require('./middlewares/setCorsHeaders');
 const catchCorsError = require('./middlewares/catchCorsError');
-
-// routes
-const authRoutes = require('./routes/auth');
-const usersRoutes = require('./routes/users');
-const messagesRoutes = require('./routes/messages');
-const notFoundRoutes = require('./routes/notFound');
-const filesRoutes = require('./routes/files');
-const attachmentsRoutes = require('./routes/attachments');
+const routes = require('./routes');
 
 const ChatSocket = require('./sockets/Chat');
 const handleSocketPreflightRequest = require('./functions/handleSocketPreflightRequest');
@@ -35,21 +27,13 @@ const { port, ip } = require('./config');
 // start express
 const app = express();
 
-// configure express
 app.disable('x-powered-by');
 
 app.use(setCorsHeaders);
 app.use(catchCorsError);
 app.use(express.json());
 app.use(catchJsonParsingError);
-
-// set express routes
-app.use('/auth', authRoutes);
-app.use('/users', usersRoutes);
-app.use('/messages', messagesRoutes);
-app.use('/attachments', attachmentsRoutes);
-app.use(filesRoutes);
-app.use('*', notFoundRoutes);
+app.use(routes);
 
 // configure socket.io
 // TODO: move to sockets/Connection external class
@@ -72,5 +56,4 @@ server.listen(port, ip, () => {
 });
 
 // TODO: move controllers to external files
-// TODO: add routes/index.js
 // TODO: improve errors handling
