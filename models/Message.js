@@ -56,38 +56,19 @@ Message._includeOptions = [
 
 Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
 
-    // TODO: replace ifs with ternaries
-    const options = {
+    const messages = await Message.findAll({
 
         order: [
             ['id', 'DESC']
         ],
 
         attributes: ['id', 'content', 'date'],
-        include: Message._includeOptions
-    };
+        include: Message._includeOptions,
 
-    if (skip !== undefined) {
-
-        options.offset = skip;
-    }
-
-    if (limit !== undefined) {
-
-        options.limit = limit;
-    }
-
-    if (before !== undefined) {
-
-        options.where = {
-
-            id: {
-                [Op.lt]: before
-            }
-        };
-    }
-
-    const messages = await Message.findAll(options);
+        offset: (skip !== undefined) ? skip : undefined,
+        limit: (limit !== undefined) ? limit : undefined,
+        where: (before !== undefined) ? { id: { [Op.lt]: before } } : undefined
+    });
 
     return messages.reverse();
 };
