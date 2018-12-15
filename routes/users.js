@@ -5,6 +5,7 @@ const checkUsernameAvailability = require('../middlewares/guards/checkUsernameAv
 const authorization = require('../middlewares/guards/authorization');
 const userSchema = require('../validationSchemas/user');
 const validateRequestBody = require('../middlewares/validateRequestBody');
+const handleInvalidHttpMethod = require('../middlewares/handlers/handleInvalidHttpMethod');
 const controllers = require('../controllers/users');
 
 const usernameAvailabilityRequestSchema = require(
@@ -19,5 +20,8 @@ router.post('/username-availability', validateRequestBody(usernameAvailabilityRe
 router.get('/', controllers.getUsers);
 router.post('/', controllers.addUser);
 router.post('/username-availability', controllers.checkUsernameAvailability);
+
+router.all('/', handleInvalidHttpMethod(['GET', 'POST']));
+router.all('/username-availability', handleInvalidHttpMethod('POST'));
 
 module.exports = router;

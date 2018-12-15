@@ -9,7 +9,6 @@ module.exports = async (socket, next) => {
     try {
 
         const { cookie, authorization } = socket.handshake.headers;
-        logger.log(authorization);
         const token = getToken(authorization, cookie);
 
         socket.handshake.tokenData = await User.verifyToken(token);

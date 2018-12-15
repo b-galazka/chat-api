@@ -24,4 +24,4 @@ module.exports = (req, res) => {
     res.end();
 };
 
-// TODO: move to controllers
+// TODO: move to sockets/middlewares
