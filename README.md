@@ -1,3 +1,8 @@
+# Requirements
+
+* NodeJS 8 or newer
+* MySQL 5.7 or newer
+
 # Chat API
 How to use:
 1. Run "npm install" command.
