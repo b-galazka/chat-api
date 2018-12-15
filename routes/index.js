@@ -6,7 +6,9 @@ const messagesRoutes = require('./messages');
 const notFoundRoutes = require('./notFound');
 const filesRoutes = require('./files');
 const attachmentsRoutes = require('./attachments');
+const homeRoutes = require('./home');
 
+router.use('/', homeRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
 router.use('/messages', messagesRoutes);
