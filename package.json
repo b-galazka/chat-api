@@ -7,6 +7,8 @@
     "start-dev": "cross-env NODE_ENV=development nodemon index.js",
     "start": "cross-env NODE_ENV=production node index.js",
     "build": "cross-env NODE_ENV=production webpack -p",
+    "test": "cross-env NODE_ENV=test jest",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
     "lint": "eslint **/*.js"
   },
   "author": "b-galazka",
@@ -30,6 +32,7 @@
     "cross-env": "^5.2.0",
     "eslint": "^5.10.0",
     "eslint-plugin-import": "^2.14.0",
+    "jest": "^23.6.0",
     "terser-webpack-plugin": "^1.1.0",
     "webpack": "^4.27.1",
     "webpack-cli": "^3.1.2",

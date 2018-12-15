@@ -1,0 +1,2 @@
+exports.error = () => { };
+exports.log = () => { };

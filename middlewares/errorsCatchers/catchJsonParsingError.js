@@ -4,5 +4,5 @@ module.exports = (err, req, res, next) => {
 
     logger.error(err);
 
-    res.status(500).send({ message: 'invalid JSON format' });
+    res.status(400).send({ message: 'invalid JSON format' });
 };
