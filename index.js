@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
-const bodyParser = require('body-parser');
 
 // middlewares
 const catchJsonParsingError = require('./middlewares/catchJsonParsingError');
@@ -31,7 +30,7 @@ app.disable('x-powered-by');
 
 app.use(setCorsHeaders);
 app.use(catchCorsError);
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(catchJsonParsingError);
 
 // set express routes
@@ -45,7 +44,7 @@ app.use('*', notFoundRoutes);
 // configure socket.io
 const server = http.Server(app);
 const io = socketIO(server, {
-    pingInterval: 10000, 
+    pingInterval: 10000,
     pingTimeout: 5000,
     handlePreflightRequest: handleSocketPreflightRequest
 });
