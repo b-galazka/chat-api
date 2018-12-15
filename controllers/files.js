@@ -1,17 +1,6 @@
 const SavedFile = require('../models/SavedFile');
-const logger = require('../utils/logger');
 
-exports.getFileById = async (req, res) => {
-
-    const onErrorHandler = (err) => {
-
-        if (err) {
-
-            logger.error(err);
-
-            res.status(500).send({ message: 'something went wrong' });
-        }
-    };
+exports.getFileById = async (req, res, next) => {
 
     try {
 
@@ -27,13 +16,13 @@ exports.getFileById = async (req, res) => {
 
         if (action === 'download') {
 
-            return res.download(file.path, name, onErrorHandler);
+            return res.download(file.path, name, err => err && next(err));
         }
 
-        res.sendFile(file.path, onErrorHandler);
+        res.sendFile(file.path, err => err && next(err));
 
     } catch (err) {
 
-        onErrorHandler(err);
+        next(err);
     }
 };

@@ -11,10 +11,11 @@ const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
 
-const catchJsonParsingError = require('./middlewares/catchJsonParsingError');
+const catchJsonParsingError = require('./middlewares/errorsCatchers/catchJsonParsingError');
+const catchCorsError = require('./middlewares/errorsCatchers/catchCorsError');
+const catchUnknownError = require('./middlewares/errorsCatchers/catchUnknownError');
 const socketAuthorization = require('./middlewares/socketAuthorization');
 const setCorsHeaders = require('./middlewares/setCorsHeaders');
-const catchCorsError = require('./middlewares/catchCorsError');
 const routes = require('./routes');
 
 const ChatSocket = require('./sockets/Chat');
@@ -34,6 +35,7 @@ app.use(catchCorsError);
 app.use(express.json());
 app.use(catchJsonParsingError);
 app.use(routes);
+app.use(catchUnknownError);
 
 // configure socket.io
 // TODO: move to sockets/Connection external class
@@ -54,5 +56,3 @@ server.listen(port, ip, () => {
 
     logger.log(`app is listening for requests at ${ip}:${port}`);
 });
-
-// TODO: improve errors handling

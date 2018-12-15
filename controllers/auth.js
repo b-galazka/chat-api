@@ -1,7 +1,6 @@
 const User = require('../models/User');
-const logger = require('../utils/logger');
 
-exports.signIn = async (req, res) => {
+exports.signIn = async (req, res, next) => {
 
     try {
 
@@ -22,18 +21,12 @@ exports.signIn = async (req, res) => {
 
     } catch (err) {
 
-        logger.error(err);
-
         if (err.message === 'invalid credentials') {
 
-            return res.status(403).send({
-                message: 'wrong username or password'
-            });
+            return res.status(403).send({ message: 'wrong username or password' });
         }
 
-        res.status(500).send({
-            message: 'something went wrong'
-        });
+        next(err);
     }
 };
 

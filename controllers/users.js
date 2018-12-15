@@ -1,24 +1,20 @@
 const User = require('../models/User');
-const logger = require('../utils/logger');
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
 
     try {
 
         const users = await User.loadAlphabeticalList();
 
         res.send(users);
+
     } catch (err) {
 
-        logger.error(err);
-
-        res.status(500).send({
-            message: 'something went wrong'
-        });
+        next(err);
     }
 };
 
-exports.addUser = async (req, res) => {
+exports.addUser = async (req, res, next) => {
 
     try {
 
@@ -26,43 +22,29 @@ exports.addUser = async (req, res) => {
 
         const createdUser = await User.create({ username, password });
 
-        res.status(201).send({
-            username: createdUser.username,
-            id: createdUser.id
-        });
+        res.status(201).send({ username: createdUser.username, id: createdUser.id });
+
     } catch (err) {
 
-        logger.error(err);
-
-        res.status(500).send({
-            message: 'something went wrong'
-        });
+        next(err);
     }
 };
 
-exports.checkUsernameAvailability = async (req, res) => {
+exports.checkUsernameAvailability = async (req, res, next) => {
 
     try {
 
         const { username } = req.body;
 
+        // TODO: User.checkUsernameAvailability?
         const user = await User.findOne({
-
-            where: {
-                username: username.trim()
-            }
+            where: { username: username.trim() }
         });
 
-        res.send({
-            username,
-            free: !user
-        });
+        res.send({ username, free: !user });
+
     } catch (err) {
 
-        logger.error(err);
-
-        res.status(500).send({
-            message: 'something went wrong'
-        });
+        next(err);
     }
 };

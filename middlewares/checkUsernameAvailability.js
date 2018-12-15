@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const logger = require('../utils/logger');
 
 module.exports = async (req, res, next) => {
 
@@ -23,10 +22,6 @@ module.exports = async (req, res, next) => {
 
     } catch (err) {
 
-        logger.error(err);
-
-        return res.status(500).send({
-            message: 'something went wrong'
-        });
+        next(err);
     }
 };
