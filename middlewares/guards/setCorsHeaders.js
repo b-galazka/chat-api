@@ -1,6 +1,6 @@
 const cors = require('cors');
 
-const { allowedDomains } = require('../config');
+const { allowedDomains } = require('../../config');
 
 const corsOptions = {
 

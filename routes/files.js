@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const authorization = require('../middlewares/authorization');
+const authorization = require('../middlewares/guards/authorization');
 const controllers = require('../controllers/files');
 
 router.get('/:id', authorization);

@@ -1,8 +1,8 @@
 const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
-const User = require('../models/User');
-const getToken = require('../functions/getToken');
-const logger = require('../utils/logger');
+const User = require('../../models/User');
+const getToken = require('../../functions/getToken');
+const logger = require('../../utils/logger');
 
 module.exports = async (req, res, next) => {
 

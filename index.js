@@ -15,7 +15,7 @@ const catchJsonParsingError = require('./middlewares/errorsCatchers/catchJsonPar
 const catchCorsError = require('./middlewares/errorsCatchers/catchCorsError');
 const catchUnknownError = require('./middlewares/errorsCatchers/catchUnknownError');
 const socketAuthorization = require('./middlewares/socketAuthorization');
-const setCorsHeaders = require('./middlewares/setCorsHeaders');
+const setCorsHeaders = require('./middlewares/guards/setCorsHeaders');
 const routes = require('./routes');
 
 const ChatSocket = require('./sockets/Chat');

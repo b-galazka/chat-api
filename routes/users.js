@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
 
-const checkUsernameAvailability = require('../middlewares/checkUsernameAvailability');
-const authorization = require('../middlewares/authorization');
+const checkUsernameAvailability = require('../middlewares/guards/checkUsernameAvailability');
+const authorization = require('../middlewares/guards/authorization');
 const userSchema = require('../validationSchemas/user');
 const validateRequestBody = require('../middlewares/validateRequestBody');
 const controllers = require('../controllers/users');
