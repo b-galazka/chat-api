@@ -1,6 +1,5 @@
 const router = require('express').Router();
 
-
 const checkUsernameAvailability = require('../middlewares/guards/checkUsernameAvailability');
 const authorization = require('../middlewares/guards/authorization');
 const userSchema = require('../validationSchemas/user');
