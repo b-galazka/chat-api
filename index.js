@@ -1,3 +1,12 @@
+const isProd = (process.env.NODE_ENV === 'production');
+
+const sourceMaps = require('source-map-support');
+
+if (isProd) {
+
+    sourceMaps.install();
+}
+
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
@@ -7,7 +16,6 @@ const catchJsonParsingError = require('./middlewares/catchJsonParsingError');
 const socketAuthorization = require('./middlewares/socketAuthorization');
 const setCorsHeaders = require('./middlewares/setCorsHeaders');
 const catchCorsError = require('./middlewares/catchCorsError');
-
 
 // routes
 const authRoutes = require('./routes/auth');

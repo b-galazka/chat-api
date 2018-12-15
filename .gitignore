@@ -59,3 +59,6 @@ typings/
 
 # default uploaded files directory
 uploads/
+
+# built app
+build/
