@@ -49,7 +49,12 @@ User.verifyToken = token => new Promise((resolve, reject) => {
     });
 });
 
-User.findByCredentials = async (credentials) => {
+User.findByCredentials = async ({ username, password }) => {
+
+    const credentials = {
+        username: username.trim(),
+        password: User.generateHash(password)
+    };
 
     const user = await User.findOne({ where: credentials });
 
@@ -99,17 +104,6 @@ User.hook('beforeCreate', (instance) => {
     if (typeof instance.password === 'string') {
 
         instance.password = User.generateHash(instance.password);
-    }
-});
-
-// TODO: move to User.findByCredentials?
-User.hook('beforeFind', (options) => {
-
-    const { where } = options;
-
-    if (where && typeof where.password === 'string') {
-
-        where.password = User.generateHash(where.password);
     }
 });
 
