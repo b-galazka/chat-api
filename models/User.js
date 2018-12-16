@@ -83,6 +83,15 @@ User.loadAlphabeticalList = () => User.findAll({
     ]
 });
 
+User.isUsernameAvailable = async (username) => {
+
+    const user = await User.findOne({
+        where: { username }
+    });
+
+    return !user;
+};
+
 User.hook('beforeValidate', trimStrings);
 
 User.hook('beforeCreate', (instance) => {

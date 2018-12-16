@@ -36,12 +36,9 @@ exports.checkUsernameAvailability = async (req, res, next) => {
 
         const { username } = req.body;
 
-        // TODO: User.checkUsernameAvailability?
-        const user = await User.findOne({
-            where: { username: username.trim() }
-        });
+        const isUsernameAvailable = await User.isUsernameAvailable(username.trim());
 
-        res.send({ username, free: !user });
+        res.send({ username, free: isUsernameAvailable });
 
     } catch (err) {
 

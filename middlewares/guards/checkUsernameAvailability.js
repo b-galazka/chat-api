@@ -6,12 +6,9 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        // TODO: move to User.checkUsernameAvailability?
-        const user = await User.findOne({
-            where: { username }
-        });
+        const isUsernameAvailable = await User.isUsernameAvailable(username.trim());
 
-        if (user) {
+        if (!isUsernameAvailable) {
 
             return res.status(409).send({
                 message: 'provided username is being used'
