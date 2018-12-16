@@ -8,7 +8,7 @@ const uploadFilePartDataSchema = require('../validationSchemas/uploadFilePartDat
 const FileUpload = require('../tools/FileUpload');
 const logger = require('../utils/logger');
 
-class ChatSocket {
+class Chat {
 
     constructor(io) {
 
@@ -32,8 +32,8 @@ class ChatSocket {
             this._setOnStartFileUploadHandler(socket);
             this._setOnUploadFilePartHandler(socket);
 
-            ChatSocket._setOnTypingFinishedHandler(socket);
-            ChatSocket._setOnTypingStartedHandler(socket);
+            Chat._setOnTypingFinishedHandler(socket);
+            Chat._setOnTypingStartedHandler(socket);
         });
 
         return this;
@@ -229,7 +229,7 @@ class ChatSocket {
 
             await fileUpload.writeFile(data);
 
-            ChatSocket._onFilePartUploaded({ socket, uploadId, fileUpload });
+            Chat._onFilePartUploaded({ socket, uploadId, fileUpload });
 
             if (fileUpload.isFinished()) {
 
@@ -300,4 +300,4 @@ class ChatSocket {
     }
 }
 
-module.exports = ChatSocket;
+module.exports = Chat;

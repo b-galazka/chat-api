@@ -1,4 +1,4 @@
-const { allowedDomains } = require('../config');
+const { allowedDomains } = require('../../config');
 
 module.exports = (req, res) => {
 
@@ -23,5 +23,3 @@ module.exports = (req, res) => {
 
     res.end();
 };
-
-// TODO: move to sockets/middlewares

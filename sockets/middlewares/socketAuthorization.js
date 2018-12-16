@@ -1,15 +1,15 @@
 const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
-const User = require('../models/User');
-const getToken = require('../functions/getToken');
-const logger = require('../utils/logger');
+const User = require('../../models/User');
+const getTokenFromHeader = require('../../functions/getTokenFromHeader');
+const logger = require('../../utils/logger');
 
 module.exports = async (socket, next) => {
 
     try {
 
         const { cookie, authorization } = socket.handshake.headers;
-        const token = getToken(authorization, cookie);
+        const token = getTokenFromHeader(authorization, cookie);
 
         socket.handshake.tokenData = await User.verifyToken(token);
 
@@ -29,5 +29,3 @@ module.exports = async (socket, next) => {
         next(err);
     }
 };
-
-// TODO: move to sockets/utils/

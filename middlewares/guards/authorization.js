@@ -1,7 +1,7 @@
 const { TokenExpiredError, JsonWebTokenError } = require('jsonwebtoken');
 
 const User = require('../../models/User');
-const getToken = require('../../functions/getToken');
+const getTokenFromHeader = require('../../functions/getTokenFromHeader');
 const logger = require('../../utils/logger');
 
 module.exports = async (req, res, next) => {
@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
 
         const authHeader = req.header('Authorization');
         const cookiesHeader = req.header('Cookie');
-        const token = getToken(authHeader, cookiesHeader);
+        const token = getTokenFromHeader(authHeader, cookiesHeader);
 
         const tokenData = await User.verifyToken(token);
 
