@@ -1,5 +1,5 @@
 const Message = require('../models/Message');
-const getPaginationOptions = require('../functions/getPaginationOptions');
+const getPaginationOptions = require('./utils/getPaginationOptions');
 
 exports.getMessages = async (req, res, next) => {
 

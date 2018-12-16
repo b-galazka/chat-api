@@ -1,5 +1,5 @@
 const MessageAttachment = require('../models/MessageAttachment');
-const getPaginationOptions = require('../functions/getPaginationOptions');
+const getPaginationOptions = require('./utils/getPaginationOptions');
 
 exports.getAttachments = async (req, res, next) => {
 

@@ -7,5 +7,3 @@ module.exports = reqQuery => Object.keys(reqQuery).reduce((options, key) => {
     return options;
 
 }, {});
-
-// TODO: move to controllers/utils

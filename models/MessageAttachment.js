@@ -1,7 +1,7 @@
 const { STRING, INTEGER, JSON: JsonDataType, Op } = require('sequelize');
 
 const db = require('../db');
-const trimStrings = require('../functions/trimSequelizeModelStrings');
+const trimStrings = require('./utils/trimSequelizeModelStrings');
 const SavedFile = require('./SavedFile');
 const ImageResizer = require('../tools/ImageResizer');
 

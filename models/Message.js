@@ -3,7 +3,7 @@ const { TEXT, DATE, NOW, INTEGER, Op } = require('sequelize');
 const db = require('../db');
 const User = require('./User');
 const MessageAttachment = require('./MessageAttachment');
-const trimStrings = require('../functions/trimSequelizeModelStrings');
+const trimStrings = require('./utils/trimSequelizeModelStrings');
 
 const messageSchema = {
 

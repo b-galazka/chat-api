@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const { hashSecret, jwtSecret, jwtTtl } = require('../config');
 const db = require('../db');
-const trimStrings = require('../functions/trimSequelizeModelStrings');
+const trimStrings = require('./utils/trimSequelizeModelStrings');
 
 const userSchema = {
 
