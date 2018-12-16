@@ -15,12 +15,15 @@ router.post('/', validateRequestBody(userSchema));
 router.post('/', checkUsernameAvailability);
 router.get('/', authorization);
 router.post('/username-availability', validateRequestBody(usernameAvailabilityRequestSchema));
+router.get('/me', authorization);
 
 router.get('/', controllers.getUsers);
 router.post('/', controllers.addUser);
 router.post('/username-availability', controllers.checkUsernameAvailability);
+router.get('/me', controllers.getCurrentUser);
 
 router.all('/', handleInvalidHttpMethod(['GET', 'POST']));
 router.all('/username-availability', handleInvalidHttpMethod('POST'));
+router.all('/me', handleInvalidHttpMethod('GET'));
 
 module.exports = router;

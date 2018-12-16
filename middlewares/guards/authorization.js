@@ -12,7 +12,9 @@ module.exports = async (req, res, next) => {
         const cookiesHeader = req.header('Cookie');
         const token = getToken(authHeader, cookiesHeader);
 
-        await User.verifyToken(token);
+        const tokenData = await User.verifyToken(token);
+
+        req.tokenData = tokenData;
 
         next();
 

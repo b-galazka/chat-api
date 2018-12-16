@@ -13,10 +13,7 @@ exports.signIn = async (req, res, next) => {
             id: user.id
         });
 
-        // TODO: add GET users/me instead of setting username cookie
-        res.cookie('username', user.username);
         res.cookie('token', token, { httpOnly: true });
-
         res.send({ token });
 
     } catch (err) {
@@ -32,9 +29,6 @@ exports.signIn = async (req, res, next) => {
 
 exports.signOut = (req, res) => {
 
-    // TODO: clear only token cookie
-    res.clearCookie('username');
     res.clearCookie('token');
-
-    res.send({ message: 'logged out' });
+    res.send({ message: 'signed out' });
 };

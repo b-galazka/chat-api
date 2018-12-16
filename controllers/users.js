@@ -22,7 +22,11 @@ exports.addUser = async (req, res, next) => {
 
         const createdUser = await User.create({ username, password });
 
-        res.status(201).send({ username: createdUser.username, id: createdUser.id });
+        const createdUserJson = createdUser.toJSON();
+
+        delete createdUserJson.password;
+
+        res.status(201).send(createdUserJson);
 
     } catch (err) {
 
@@ -39,6 +43,24 @@ exports.checkUsernameAvailability = async (req, res, next) => {
         const isUsernameAvailable = await User.isUsernameAvailable(username.trim());
 
         res.send({ username, free: isUsernameAvailable });
+
+    } catch (err) {
+
+        next(err);
+    }
+};
+
+exports.getCurrentUser = async (req, res, next) => {
+
+    try {
+
+        const { tokenData } = req;
+
+        const currentUser = await User.findById(tokenData.id, {
+            attributes: { exclude: ['password'] }
+        });
+
+        res.send(currentUser);
 
     } catch (err) {
 
