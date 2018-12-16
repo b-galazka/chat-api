@@ -6,9 +6,9 @@ module.exports = requestBodySchema => (req, res, next) => {
 
     if (error) {
 
-        const { message } = error;
-
-        return res.status(400).send({ message });
+        return res.status(400).send({
+            message: { requestBodyValidationError: error.message }
+        });
     }
 
     next();
