@@ -14,7 +14,7 @@ exports.signIn = async (req, res, next) => {
         });
 
         res.cookie('token', token, { httpOnly: true });
-        res.send({ token });
+        res.send({ token, user });
 
     } catch (err) {
 

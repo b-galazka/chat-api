@@ -56,7 +56,11 @@ User.findByCredentials = async ({ username, password }) => {
         password: User.generateHash(password)
     };
 
-    const user = await User.findOne({ where: credentials });
+    const attributes = {
+        exclude: ['password']
+    };
+
+    const user = await User.findOne({ where: credentials, attributes });
 
     if (!user) {
 
