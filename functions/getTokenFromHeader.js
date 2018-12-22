@@ -26,7 +26,7 @@ const getTokenFromCookiesHeader = (cookiesHeader) => {
         return cookie.parse(cookiesHeader).token;
     }
 
-    throw new Error('invalid cookies header provided');
+    throw new Error('invalid cookies header provided and no authorization header provided');
 };
 
 module.exports = (authHeader, cookiesHeader) => (
