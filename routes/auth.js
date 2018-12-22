@@ -8,9 +8,9 @@ const controllers = require('../controllers/auth');
 router.post('/sign-in', validateRequestBody(authCredentialsSchema));
 
 router.post('/sign-in', controllers.signIn);
-router.get('/sign-out', controllers.signOut);
+router.delete('/sign-out', controllers.signOut);
 
 router.all('/sign-in', handleInvalidHttpMethod('POST'));
-router.all('/sign-out', handleInvalidHttpMethod('GET'));
+router.all('/sign-out', handleInvalidHttpMethod('DELETE'));
 
 module.exports = router;
