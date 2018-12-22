@@ -60,7 +60,7 @@ exports.getCurrentUser = async (req, res, next) => {
             attributes: { exclude: ['password'] }
         });
 
-        res.send(currentUser);
+        res.send({ user: currentUser });
 
     } catch (err) {
 
