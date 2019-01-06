@@ -1,10 +1,13 @@
+const ms = require('ms');
+
 const User = require('../models/User');
+const { jwtTtl } = require('../config');
 
 exports.signIn = async (req, res, next) => {
 
     try {
 
-        const { username, password } = req.body;
+        const { username, password, keepSignedIn } = req.body;
 
         const user = await User.findByCredentials({ username, password });
 
@@ -13,7 +16,11 @@ exports.signIn = async (req, res, next) => {
             id: user.id
         });
 
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, {
+            httpOnly: true,
+            expires: keepSignedIn ? new Date(Date.now() + ms(jwtTtl)) : 0
+        });
+
         res.send({ token, user });
 
     } catch (err) {
