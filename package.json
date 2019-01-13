@@ -9,7 +9,8 @@
     "build": "cross-env NODE_ENV=production webpack -p",
     "test": "cross-env NODE_ENV=test jest",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "lint": "eslint **/*.js"
+    "lint": "eslint **/*.js",
+    "db-sync": "node db/sync"
   },
   "author": "b-galazka",
   "license": "ISC",

@@ -5,7 +5,7 @@
 
 # Chat API
 How to use:
-1. Run "npm install" command.
+1. Run `npm install` command.
 2. Create .env file and set enviroment variables. Example .env file:  
 HASH_SECRET="secret string"  
 JWT_SECRET="another secret string"  
@@ -23,8 +23,8 @@ FILE_UPLOAD_TIMEOUT=60000
 ICONS_DIMENSIONS=200,200  
 PREVIEWS_DIMENSIONS=600,600  
 MAX_FILE_PART_SIZE=1048576  
-3. Run db/sync.js script to create database.
-4. Run "npm start" or "npm run start-dev".
+3. Run `npm run db-sync` to create database.
+4. Run `npm start` or `npm run start-dev`.
 
 ___
 
