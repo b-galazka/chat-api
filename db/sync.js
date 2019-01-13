@@ -27,12 +27,12 @@ const createDatabaseIfNotExists = async () => {
 
 const syncSequelizeModels = async () => {
 
-    await User.sync();
-    await Message.sync();
+    await User.sync({ alter: true });
+    await Message.sync({ alter: true });
 
     await Promise.all([
-        MessageAttachment.sync(),
-        SavedFile.sync()
+        MessageAttachment.sync({ alter: true }),
+        SavedFile.sync({ alter: true })
     ]);
 };
 
