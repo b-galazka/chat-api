@@ -21,13 +21,15 @@ class ImageResizer {
         return (async () => {
 
             const path = this._createRandomPath();
-            const { width, height } = iconsDimensions;
 
-            await sharp(this._filePath)
-                .resize(width, height)
+            const { width, height, size } = await sharp(this._filePath)
+                .resize(iconsDimensions.width, iconsDimensions.height)
                 .toFile(path);
 
-            return path;
+            return {
+                path,
+                metadata: { width, height, size }
+            };
         })();
     }
 
@@ -36,15 +38,17 @@ class ImageResizer {
         return (async () => {
 
             const path = this._createRandomPath();
-            const { width, height } = previewsDimensions;
 
-            await sharp(this._filePath)
-                .resize(width, height)
+            const { width, height, size } = await sharp(this._filePath)
+                .resize(previewsDimensions.width, previewsDimensions.height)
                 .withoutEnlargement()
                 .min()
                 .toFile(path);
 
-            return path;
+            return {
+                path,
+                metadata: { width, height, size }
+            };
         })();
     }
 

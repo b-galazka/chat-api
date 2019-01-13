@@ -31,6 +31,11 @@ const messageAttachmentSchema = {
     urls: {
         type: JsonDataType,
         allowNull: false
+    },
+
+    metadata: {
+        type: JsonDataType,
+        allowNull: true
     }
 };
 
@@ -43,22 +48,21 @@ const MessageAttachment = db.define(
 MessageAttachment.createWithPreview = async (messageId, fileInfo) => {
 
     const savedFile = await SavedFile.create({ path: fileInfo.path });
-    const filesIds = { originalFile: savedFile.id };
-
-    let previewsIds = {};
+    const files = { originalFile: { id: savedFile.id, metadata: fileInfo.metadata } };
 
     if (ImageResizer.isProperFileType(fileInfo.type)) {
 
-        previewsIds = await MessageAttachment._createImagePreviews(fileInfo.path);
-    }
+        const previews = await MessageAttachment._createImagePreviews(fileInfo.path);
 
-    Object.assign(filesIds, previewsIds);
+        Object.assign(files, previews);
+    }
 
     return MessageAttachment.create({
         type: fileInfo.type,
         name: fileInfo.name + fileInfo.extension,
         size: fileInfo.size,
-        urls: MessageAttachment._getFilesUrls(filesIds),
+        urls: MessageAttachment._getFilesUrls(files),
+        metadata: MessageAttachment._getFilesMetadata(files),
         messageId
     });
 };
@@ -67,31 +71,51 @@ MessageAttachment._createImagePreviews = async (filePath) => {
 
     const imagesResizer = new ImageResizer(filePath);
 
-    const [iconPath, previewPath] = await Promise.all([
+    const [icon, preview] = await Promise.all([
         imagesResizer.createIcon(),
         imagesResizer.createPreview()
     ]);
 
-    const [icon, preview] = await Promise.all([
-        SavedFile.create({ path: iconPath }),
-        SavedFile.create({ path: previewPath })
+    const [savedIcon, savedPreview] = await Promise.all([
+        SavedFile.create({ path: icon.path }),
+        SavedFile.create({ path: preview.path })
     ]);
 
     return {
-        icon: icon.id,
-        preview: preview.id
+        icon: { id: savedIcon.id, metadata: icon.metadata },
+        preview: { id: savedPreview.id, metadata: preview.metadata }
     };
 };
 
-MessageAttachment._getFilesUrls = filesIds => Object.keys(filesIds).reduce((urls, fileType) => {
+MessageAttachment._getFilesUrls = filesInfo => Object.keys(filesInfo).reduce((result, fileType) => {
 
-    const fileId = filesIds[fileType];
+    const fileId = filesInfo[fileType].id;
 
-    urls[fileType] = '/get-file/' + fileId;
+    result[fileType] = '/get-file/' + fileId;
 
-    return urls;
+    return result;
 
 }, {});
+
+MessageAttachment._getFilesMetadata = filesInfo => (
+    Object.keys(filesInfo).reduce((result, fileType) => {
+
+        const fileMetadata = filesInfo[fileType].metadata;
+
+        if (fileMetadata && !result) {
+
+            return { [fileType]: fileMetadata };
+        }
+
+        if (fileMetadata) {
+
+            result[fileType] = fileMetadata;
+        }
+
+        return result;
+
+    }, null)
+);
 
 MessageAttachment.loadByTimeDesc = ({ skip, limit, before } = {}) => {
 
@@ -112,8 +136,8 @@ MessageAttachment.loadByTimeDesc = ({ skip, limit, before } = {}) => {
             }
         ],
 
-        offset: (skip !== undefined) ? skip : undefined,
-        limit: (limit !== undefined) ? limit : undefined,
+        offset: skip,
+        limit,
         where: (before !== undefined) ? { id: { [Op.lt]: before } } : undefined
     });
 };

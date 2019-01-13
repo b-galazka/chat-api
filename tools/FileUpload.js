@@ -2,6 +2,7 @@ const cuid = require('cuid');
 const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
 
 const { fileUploadTimeout, uploadsDir } = require('../config');
 const logger = require('../utils/logger');
@@ -28,26 +29,60 @@ class FileUpload extends EventEmitter {
 
     writeFile(data) {
 
-        return new Promise((resolve) => {
-
-            const writeStream = this._writeStream;
+        return new Promise((resolve, reject) => {
 
             this._updateTimeout();
 
-            writeStream.write(data, () => {
+            this._writeStream.write(data, async (err) => {
 
-                this.writtenBytes = writeStream.bytesWritten;
+                if (err) {
 
-                resolve();
+                    this._cleanupAfterUploadFailure();
 
-                if (this.isFinished()) {
+                    return reject(err);
+                }
 
-                    clearTimeout(this._timeout);
+                this.writtenBytes = this._writeStream.bytesWritten;
 
-                    writeStream.close();
+                if (!this.isFinished()) {
+
+                    return resolve();
+                }
+
+                this._cleanupAfterUploadSuccess();
+
+                try {
+
+                    resolve(await this.getUploadedFileMetadata());
+
+                } catch (err) {
+
+                    logger.error(err);
+
+                    reject(err);
                 }
             });
         });
+    }
+
+    getUploadedFileMetadata() {
+
+        return (async () => {
+
+            if (!this.isFinished()) {
+
+                throw new Error('File is not fully uploaded yet');
+            }
+
+            if (!this.fileInfo.type.startsWith('image/')) {
+
+                return null;
+            }
+
+            const { size, width, height } = await sharp(this.fileInfo.path).metadata();
+
+            return { size, width, height };
+        })();
     }
 
     _getFileInfo({ name, type, size }) {
@@ -66,18 +101,10 @@ class FileUpload extends EventEmitter {
 
     _initTimeoutEvent() {
 
-        this._timeout = setTimeout(async () => {
+        this._timeout = setTimeout(() => {
 
             this.emit('timeout');
-
-            try {
-
-                await this._removePartlyUploadedFile();
-
-            } catch (err) {
-
-                logger.error(err);
-            }
+            this._cleanupAfterUploadFailure();
 
         }, fileUploadTimeout);
     }
@@ -87,6 +114,32 @@ class FileUpload extends EventEmitter {
         clearTimeout(this._timeout);
 
         this._initTimeoutEvent();
+    }
+
+    _cleanupAfterUploadFailure() {
+
+        clearTimeout(this._timeout);
+
+        this._writeStream.close();
+
+        return (async () => {
+
+            try {
+
+                await this._removePartlyUploadedFile();
+
+            } catch (err) {
+
+                logger.error(err);
+            }
+        })();
+    }
+
+    _cleanupAfterUploadSuccess() {
+
+        clearTimeout(this._timeout);
+
+        this._writeStream.close();
     }
 
     _removePartlyUploadedFile() {

@@ -65,8 +65,8 @@ Message.loadByTimeAsc = async ({ skip, limit, before } = {}) => {
         attributes: ['id', 'content', 'date'],
         include: Message._includeOptions,
 
-        offset: (skip !== undefined) ? skip : undefined,
-        limit: (limit !== undefined) ? limit : undefined,
+        offset: skip,
+        limit,
         where: (before !== undefined) ? { id: { [Op.lt]: before } } : undefined
     });
 

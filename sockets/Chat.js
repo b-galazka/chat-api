@@ -227,18 +227,19 @@ class Chat {
                 });
             }
 
-            await fileUpload.writeFile(data);
+            const metadata = await fileUpload.writeFile(data);
+            const fileInfo = Object.assign({}, fileUpload.fileInfo, { metadata });
 
             Chat._onFilePartUploaded({ socket, uploadId, fileUpload });
 
             if (fileUpload.isFinished()) {
 
-                this._onWholeFileUploaded({ socket, uploadId, fileUpload });
+                this._onWholeFileUploaded({ socket, uploadId, fileInfo });
             }
         });
     }
 
-    _onWholeFileUploaded({ socket, uploadId, fileUpload }) {
+    _onWholeFileUploaded({ socket, uploadId, fileInfo }) {
 
         (async () => {
 
@@ -248,9 +249,7 @@ class Chat {
 
                 const uploaderId = socket.handshake.tokenData.id;
 
-                const createdMessage = await Message.createWithAttachment(
-                    uploaderId, fileUpload.fileInfo
-                );
+                const createdMessage = await Message.createWithAttachment(uploaderId, fileInfo);
 
                 socket.broadcast.emit('message', createdMessage);
 
