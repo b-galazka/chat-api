@@ -125,7 +125,7 @@ MessageAttachment.loadByTimeDesc = ({ skip, limit, before } = {}) => {
             ['id', 'DESC']
         ],
 
-        attributes: ['id', 'type', 'name', 'size', 'url', 'iconUrl', 'resizedImageUrl'],
+        attributes: ['id', 'type', 'name', 'size', 'urls', 'metadata'],
 
         include: [
 

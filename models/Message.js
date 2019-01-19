@@ -45,12 +45,12 @@ Message._includeOptions = [
 
     {
         association: 'author',
-        attributes: ['username']
+        attributes: ['id', 'username']
     },
 
     {
         association: 'attachment',
-        attributes: ['type', 'name', 'size', 'urls']
+        attributes: ['id', 'type', 'name', 'size', 'urls', 'metadata']
     }
 ];
 
