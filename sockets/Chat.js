@@ -221,59 +221,62 @@ class Chat {
 
             if (!fileUpload) {
 
-                return socket.emit('uploading file error', {
-                    uploadId,
-                    message: 'invalid ID'
-                });
+                return socket.emit('uploading file error', { uploadId, message: 'invalid ID' });
             }
-
-            const metadata = await fileUpload.writeFile(data);
-            const fileInfo = Object.assign({}, fileUpload.fileInfo, { metadata });
-
-            Chat._onFilePartUploaded({ socket, uploadId, fileUpload });
-
-            if (fileUpload.isFinished()) {
-
-                this._onWholeFileUploaded({ socket, uploadId, fileInfo });
-            }
-        });
-    }
-
-    _onWholeFileUploaded({ socket, uploadId, fileInfo }) {
-
-        (async () => {
 
             try {
 
-                this._activeFilesUploads.delete(uploadId);
+                await fileUpload.writeFile(data);
 
-                const uploaderId = socket.handshake.tokenData.id;
+                Chat._onFilePartUploaded(socket, fileUpload);
 
-                const createdMessage = await Message.createWithAttachment(uploaderId, fileInfo);
+                if (fileUpload.isFinished()) {
 
-                socket.broadcast.emit('message', createdMessage);
-
-                socket.emit('file uploaded', {
-                    uploadId,
-                    message: createdMessage
-                });
+                    this._onWholeFileUploaded(socket, fileUpload);
+                }
 
             } catch (err) {
 
                 logger.error(err);
 
-                socket.emit('uploading file error', {
-                    uploadId,
-                    message: 'something went wrong'
-                });
+                socket.emit('uploading file error', { uploadId, message: 'something went wrong' });
+            }
+        });
+    }
+
+    _onWholeFileUploaded(socket, fileUpload) {
+
+        (async () => {
+
+            const uploadId = fileUpload.id;
+            const uploaderId = socket.handshake.tokenData.id;
+
+            this._activeFilesUploads.delete(uploadId);
+
+            try {
+
+                const fileMetadata = await fileUpload.getFileMetadata();
+
+                const fileInfo = Object.assign({}, fileUpload.fileInfo, { metadata: fileMetadata });
+
+                const createdMessage = await Message.createWithAttachment(uploaderId, fileInfo);
+
+                socket.broadcast.emit('message', createdMessage);
+                socket.emit('file uploaded', { uploadId, message: createdMessage });
+
+            } catch (err) {
+
+                logger.error(err);
+
+                socket.emit('uploading file error', { uploadId, message: 'something went wrong' });
             }
         })();
     }
 
-    static _onFilePartUploaded({ socket, uploadId, fileUpload }) {
+    static _onFilePartUploaded(socket, fileUpload) {
 
         socket.emit('file part uploaded', {
-            uploadId,
+            uploadId: fileUpload.id,
             uploadedBytes: fileUpload.writtenBytes
         });
     }

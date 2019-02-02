@@ -33,7 +33,7 @@ class FileUpload extends EventEmitter {
 
             this._updateTimeout();
 
-            this._writeStream.write(data, async (err) => {
+            this._writeStream.write(data, (err) => {
 
                 if (err) {
 
@@ -44,35 +44,19 @@ class FileUpload extends EventEmitter {
 
                 this.writtenBytes = this._writeStream.bytesWritten;
 
-                if (!this.isFinished()) {
+                if (this.isFinished()) {
 
-                    return resolve();
+                    this._cleanupAfterUploadSuccess();
                 }
 
-                this._cleanupAfterUploadSuccess();
-
-                try {
-
-                    resolve(await this.getUploadedFileMetadata());
-
-                } catch (err) {
-
-                    logger.error(err);
-
-                    reject(err);
-                }
+                resolve();
             });
         });
     }
 
-    getUploadedFileMetadata() {
+    getFileMetadata() {
 
         return (async () => {
-
-            if (!this.isFinished()) {
-
-                throw new Error('File is not fully uploaded yet');
-            }
 
             if (!this.fileInfo.type.startsWith('image/')) {
 

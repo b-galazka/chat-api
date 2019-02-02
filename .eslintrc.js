@@ -106,7 +106,7 @@ module.exports = {
             "error",
             { "code": 100 }
         ],
-        "max-lines-per-function": ["error", 40],
+        "max-lines-per-function": ["error", 45],
         "max-nested-callbacks": ["error", 3],
         "max-params": ["error", 4],
         "new-cap": [
